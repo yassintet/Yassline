@@ -1,0 +1,83 @@
+Subject: Connection timeout after Network Access configured - Server selection timed out after 30000 ms
+
+---
+
+Problem Description:
+
+I am experiencing persistent connection timeouts when trying to connect to my MongoDB Atlas cluster from Node.js applications, even though Network Access has been properly configured for over 6 hours.
+
+Cluster Details:
+- Cluster Name: Yassline
+- Database: yasslinetour
+- User: yasslinetour_db_user
+- Connection String Format: mongodb://yasslinetour_db_user:***@ac-nbesxsy-shard-00-00.v3oycnj.mongodb.net:27017,ac-nbesxsy-shard-00-01.v3oycnj.mongodb.net:27017,ac-nbesxsy-shard-00-02.v3oycnj.mongodb.net:27017/yasslinetour?ssl=true&authSource=admin&replicaSet=atlas-nbesxsy-shard-0&retryWrites=true&w=majority
+
+Error Messages:
+- Primary: MongoServerSelectionError: Server selection timed out after 30000 ms
+- SRV Format: querySrv ECONNREFUSED _mongodb._tcp.yassline.v3oycnj.mongodb.net
+- Standard Format: Server selection timed out after 30000 ms
+
+What I've Verified:
+
+✅ Network Access Configuration:
+- IP Address: 0.0.0.0/0 (Allow Access from Anywhere)
+- Status: Active
+- Configured for over 6 hours
+- Attempted to delete and re-add (no change)
+
+✅ Cluster Status:
+- State: Active (not paused)
+- All shards appear to be running
+- No alerts in dashboard
+
+✅ Database and User:
+- Database yasslinetour: Created and accessible via Atlas UI
+- Collection circuits: Created and accessible via Atlas UI
+- User yasslinetour_db_user: Status Active in Database Access
+- User has proper permissions
+
+✅ Network Connectivity:
+- TCP Port Connectivity: SUCCESS
+  - All three shard servers (ports 27017) are accessible via TCP
+  - Tested using Node.js net module
+  - All connections establish successfully at TCP level
+
+What I've Tried:
+
+1. Connection Attempts:
+   - Mongoose (v9.1.5) - Multiple configurations, all timeout
+   - MongoDB Native Driver (v7.0.0) - Same timeout error
+   - Various timeout values and connection options
+
+2. Network Troubleshooting:
+   - Windows Firewall temporarily disabled - no change
+   - Antivirus temporarily disabled - no change
+   - Tested from different network (mobile hotspot) - same issue
+   - DNS resolution works correctly
+
+3. Configuration Changes:
+   - Deleted and re-added 0.0.0.0/0 in Network Access
+   - Verified user permissions multiple times
+   - Tried both SRV and standard connection formats
+
+Key Observation:
+
+The TCP ports (27017) are accessible and connections establish successfully at the TCP level, but MongoDB cannot establish the connection. This suggests the issue is not a basic firewall problem, but rather something at the MongoDB protocol level (SSL/TLS handshake, authentication, or replica set configuration).
+
+Request:
+
+Please investigate:
+1. Why connections timeout even though Network Access is properly configured
+2. Whether there are any server-side restrictions preventing connections
+3. If there are any logs on the Atlas side showing connection attempts being rejected
+4. Whether the replica set configuration might be causing issues
+
+I can provide additional diagnostic information or perform specific tests if needed.
+
+Environment:
+- OS: Windows 10/11
+- Node.js: v24.13.0
+- MongoDB Driver: v7.0.0
+- Mongoose: v9.1.5
+
+Thank you for your assistance.

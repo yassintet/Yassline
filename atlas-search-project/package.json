@@ -1,0 +1,22 @@
+{
+  "name": "atlas-search-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:connection": "node test-connection.js",
+    "verify": "node verify-connection.js",
+    "diagnose": "node diagnose-connection.js",
+    "create-index": "node create-index.js",
+    "create-index:simple": "node create-index-simple.js",
+    "create-search-index": "node create-search-index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "mongodb": "^7.0.0"
+  }
+}

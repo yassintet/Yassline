@@ -1,13 +1,13 @@
-﻿{
+{
   "name": "yassline",
   "version": "1.0.0",
-  "description": "Yassline Tour - backend",
+  "description": "Yassline Tour Platform",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/server.js"
+    "start": "cd backend && node server.js",
+    "postinstall": "cd backend && npm install --production"
   },
-  "postinstall": "cd backend && npm install --production",
   "engines": {
-    "node": "16.x"
+    "node": ">=18.x"
   }
 }

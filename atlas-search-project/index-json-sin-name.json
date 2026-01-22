@@ -1,0 +1,36 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "name": {
+        "type": "autocomplete",
+        "analyzer": "lucene.standard",
+        "tokenization": "edgeGram",
+        "minGrams": 2,
+        "maxGrams": 15,
+        "foldDiacritics": true,
+        "similarity": {
+          "type": "bm25"
+        }
+      },
+      "title": {
+        "type": "autocomplete",
+        "analyzer": "lucene.standard",
+        "tokenization": "edgeGram",
+        "minGrams": 2,
+        "maxGrams": 15,
+        "foldDiacritics": true,
+        "similarity": {
+          "type": "bm25"
+        }
+      },
+      "description": {
+        "type": "string",
+        "analyzer": "lucene.standard",
+        "similarity": {
+          "type": "bm25"
+        }
+      }
+    }
+  }
+}
