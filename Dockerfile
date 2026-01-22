@@ -1,23 +1,23 @@
-﻿FROM node:18-alpine
+FROM node:18-alpine
 
 # Crear carpeta de trabajo
 WORKDIR /app
 
-# Copiar package.json raíz y package.json del backend para poder instalar dependencias por separado
-COPY package.json package-lock.json* ./
+# Copiar package.json del backend primero para aprovechar cache de Docker
 COPY backend/package.json backend/package-lock.json* ./backend/
 
-# Instalar dependencias (root si existieran), luego las del backend
-RUN npm install --production || true && \
-    cd backend && npm install --production
+# Instalar dependencias del backend
+RUN cd backend && npm install --production
 
-# Copiar el resto del código
-COPY . .
+# Copiar el resto del código del backend
+COPY backend/ ./backend/
 
-# Puerto por defecto
-ENV PORT=${PORT:-4000}
+# Puerto por defecto (Railway lo sobrescribirá)
+ENV PORT=4000
+ENV NODE_ENV=production
 
 EXPOSE 4000
 
-# Comando de arranque (usa tu script start en package.json)
-CMD ["npm", "start"]
+# Comando de arranque
+WORKDIR /app/backend
+CMD ["node", "server.js"]
