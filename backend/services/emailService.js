@@ -13,6 +13,18 @@ const createTransporter = () => {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      // Opciones adicionales para mejorar la conexión
+      connectionTimeout: 60000, // 60 segundos
+      greetingTimeout: 30000, // 30 segundos
+      socketTimeout: 60000, // 60 segundos
+      // Configuración TLS
+      tls: {
+        rejectUnauthorized: false, // Permitir certificados autofirmados si es necesario
+      },
+      // Reintentos
+      pool: true,
+      maxConnections: 1,
+      maxMessages: 3,
     });
   }
   
@@ -27,12 +39,29 @@ const createTransporter = () => {
   
   console.log('📧 Usando Gmail SMTP con usuario:', emailUser);
   
+  // Configuración mejorada para Gmail con opciones de conexión más robustas
   return nodemailer.createTransport({
     service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true para 465, false para otros puertos
     auth: {
       user: emailUser,
       pass: emailPass,
     },
+    // Opciones adicionales para mejorar la conexión
+    connectionTimeout: 60000, // 60 segundos
+    greetingTimeout: 30000, // 30 segundos
+    socketTimeout: 60000, // 60 segundos
+    // Configuración TLS
+    tls: {
+      rejectUnauthorized: false, // Permitir certificados autofirmados si es necesario
+      ciphers: 'SSLv3',
+    },
+    // Reintentos
+    pool: true,
+    maxConnections: 1,
+    maxMessages: 3,
   });
 };
 
