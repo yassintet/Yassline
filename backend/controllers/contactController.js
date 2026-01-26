@@ -1,4 +1,7 @@
 const Contact = require('../models/Contact');
+const emailService = require('../services/emailService');
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'info@yassline.com';
 
 // GET /api/contact - Listar todos los mensajes de contacto
 exports.getAllContacts = async (req, res) => {
@@ -51,8 +54,72 @@ exports.getContactById = async (req, res) => {
 // POST /api/contact - Crear nuevo mensaje de contacto
 exports.createContact = async (req, res) => {
   try {
-    const contact = new Contact(req.body);
+    // Mapear valores de servicio del frontend a los valores del modelo
+    const servicioFrontend = req.body.serviceType || req.body.servicio || '';
+    let serviceType = 'otro';
+    
+    // Mapear valores del frontend a valores del modelo
+    if (servicioFrontend === 'transporte' || servicioFrontend === 'transport') {
+      serviceType = 'transporte';
+    } else if (servicioFrontend === 'circuitos' || servicioFrontend === 'circuito') {
+      serviceType = 'circuito';
+    } else if (servicioFrontend === 'vehiculos' || servicioFrontend === 'hotel') {
+      // Mapear 'vehiculos' a 'otro' ya que no existe en el enum
+      serviceType = 'otro';
+    } else if (servicioFrontend === 'otro' || servicioFrontend === 'other') {
+      serviceType = 'otro';
+    }
+    
+    // Mapear nombres de campos del frontend al modelo
+    const contactData = {
+      name: req.body.name || req.body.nombre,
+      email: req.body.email,
+      phone: req.body.phone || req.body.telefono,
+      serviceType: serviceType,
+      message: req.body.message || req.body.mensaje,
+    };
+    
+    const contact = new Contact(contactData);
     await contact.save();
+    
+    // Enviar notificaciones por email (no bloquear la respuesta si falla)
+    try {
+      console.log('📧 Iniciando envío de emails de contacto...');
+      
+      // Notificación al administrador
+      console.log('📧 Enviando notificación al administrador:', ADMIN_EMAIL);
+      const adminResult = await emailService.sendContactNotification({
+        name: contact.name,
+        email: contact.email,
+        phone: contact.phone,
+        serviceType: contact.serviceType,
+        message: contact.message,
+      });
+      
+      if (adminResult.success) {
+        console.log('✅ Email al administrador enviado:', adminResult.messageId);
+      } else {
+        console.error('❌ Error enviando email al administrador:', adminResult.error);
+      }
+      
+      // Confirmación al cliente
+      console.log('📧 Enviando confirmación al cliente:', contact.email);
+      const clientResult = await emailService.sendContactConfirmation({
+        name: contact.name,
+        email: contact.email,
+        message: contact.message,
+      });
+      
+      if (clientResult.success) {
+        console.log('✅ Email de confirmación al cliente enviado:', clientResult.messageId);
+      } else {
+        console.error('❌ Error enviando email de confirmación al cliente:', clientResult.error);
+      }
+    } catch (emailError) {
+      console.error('❌ Excepción al enviar emails de contacto:', emailError.message);
+      console.error('Stack:', emailError.stack);
+      // No fallar la petición si el email falla
+    }
     
     res.status(201).json({
       success: true,

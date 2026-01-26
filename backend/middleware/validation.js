@@ -119,12 +119,19 @@ const validateTransportId = [
   handleValidationErrors,
 ];
 
-// Validaciones para Contacto
+// Validaciones para Contacto (acepta tanto nombres del frontend como del backend)
 const validateContact = [
-  body('name')
-    .trim()
-    .notEmpty().withMessage('El nombre es requerido')
-    .isLength({ min: 2, max: 100 }).withMessage('El nombre debe tener entre 2 y 100 caracteres'),
+  // Validar nombre (acepta 'name' o 'nombre')
+  body().custom((value) => {
+    const nombre = value.name || value.nombre;
+    if (!nombre || !nombre.trim()) {
+      throw new Error('El nombre es requerido');
+    }
+    if (nombre.trim().length < 2 || nombre.trim().length > 100) {
+      throw new Error('El nombre debe tener entre 2 y 100 caracteres');
+    }
+    return true;
+  }),
   
   body('email')
     .trim()
@@ -132,19 +139,49 @@ const validateContact = [
     .isEmail().withMessage('Email inválido')
     .normalizeEmail(),
   
-  body('phone')
-    .optional()
-    .trim()
-    .matches(/^[\d\s\-\+\(\)]+$/).withMessage('Formato de teléfono inválido'),
+  // Validar teléfono (acepta 'phone' o 'telefono')
+  body().custom((value) => {
+    const telefono = value.phone || value.telefono;
+    if (telefono && telefono.trim()) {
+      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+      if (!phoneRegex.test(telefono.trim())) {
+        throw new Error('Formato de teléfono inválido');
+      }
+    }
+    return true;
+  }),
   
-  body('serviceType')
-    .optional()
-    .isIn(['transporte', 'circuito', 'hotel', 'otro']).withMessage('Tipo de servicio inválido'),
+  // Validar tipo de servicio (acepta 'serviceType' o 'servicio')
+  // Acepta valores del frontend: 'transporte', 'circuitos', 'vehiculos', 'otro'
+  // Y valores del backend: 'transporte', 'circuito', 'hotel', 'otro'
+  body().custom((value) => {
+    const servicio = value.serviceType || value.servicio;
+    if (servicio && servicio.trim()) {
+      const validTypes = [
+        'transporte', 'transport',
+        'circuito', 'circuitos',
+        'hotel', 'vehiculos',
+        'otro', 'other'
+      ];
+      if (!validTypes.includes(servicio.trim().toLowerCase())) {
+        throw new Error('Tipo de servicio inválido');
+      }
+    }
+    return true;
+  }),
   
-  body('message')
-    .trim()
-    .notEmpty().withMessage('El mensaje es requerido')
-    .isLength({ min: 10, max: 2000 }).withMessage('El mensaje debe tener entre 10 y 2000 caracteres'),
+  // Validar mensaje (acepta 'message' o 'mensaje')
+  body().custom((value) => {
+    const mensaje = value.message || value.mensaje;
+    if (!mensaje || !mensaje.trim()) {
+      throw new Error('El mensaje es requerido');
+    }
+    const mensajeTrimmed = mensaje.trim();
+    if (mensajeTrimmed.length < 10 || mensajeTrimmed.length > 2000) {
+      throw new Error('El mensaje debe tener entre 10 y 2000 caracteres');
+    }
+    return true;
+  }),
   
   handleValidationErrors,
 ];
@@ -202,6 +239,58 @@ const validateVehicleId = [
   handleValidationErrors,
 ];
 
+// Validaciones para Reservas (Bookings)
+const validateBooking = [
+  body('nombre')
+    .trim()
+    .notEmpty().withMessage('El nombre es requerido')
+    .isLength({ min: 2, max: 100 }).withMessage('El nombre debe tener entre 2 y 100 caracteres'),
+  
+  body('email')
+    .trim()
+    .notEmpty().withMessage('El email es requerido')
+    .isEmail().withMessage('Email inválido')
+    .normalizeEmail(),
+  
+  body('telefono')
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .custom((value) => {
+      if (!value || value.trim() === '') {
+        return true; // Permitir vacío
+      }
+      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+      if (!phoneRegex.test(value.trim())) {
+        throw new Error('Formato de teléfono inválido');
+      }
+      return true;
+    }),
+  
+  body('serviceName')
+    .trim()
+    .notEmpty().withMessage('El nombre del servicio es requerido'),
+  
+  body('serviceType')
+    .isIn(['airport', 'intercity', 'hourly', 'custom']).withMessage('Tipo de servicio inválido'),
+  
+  body('pasajeros')
+    .optional()
+    .isInt({ min: 1, max: 50 }).withMessage('El número de pasajeros debe ser entre 1 y 50'),
+  
+  body('mensaje')
+    .optional()
+    .trim()
+    .isLength({ max: 2000 }).withMessage('El mensaje no puede exceder 2000 caracteres'),
+  
+  handleValidationErrors,
+];
+
+const validateBookingId = [
+  param('id')
+    .isMongoId().withMessage('ID de reserva inválido'),
+  handleValidationErrors,
+];
+
 module.exports = {
   handleValidationErrors,
   validateCircuit,
@@ -215,4 +304,6 @@ module.exports = {
   validateContactUpdate,
   validateVehicle,
   validateVehicleId,
+  validateBooking,
+  validateBookingId,
 };

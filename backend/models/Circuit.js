@@ -77,7 +77,8 @@ circuitSchema.index({ name: 'text', title: 'text', description: 'text' });
 
 // Middleware para generar slug automáticamente
 circuitSchema.pre('save', function(next) {
-  if (this.isModified('name') && !this.slug) {
+  // Generar slug si no existe o si el nombre cambió
+  if (this.isModified('name') || !this.slug) {
     this.slug = this.name
       .toLowerCase()
       .normalize('NFD')
@@ -85,7 +86,9 @@ circuitSchema.pre('save', function(next) {
       .replace(/[^a-z0-9]+/g, '-') // Reemplazar espacios y caracteres especiales
       .replace(/^-+|-+$/g, ''); // Eliminar guiones al inicio/final
   }
-  next();
+  if (typeof next === 'function') {
+    next();
+  }
 });
 
 module.exports = mongoose.model('Circuit', circuitSchema);
