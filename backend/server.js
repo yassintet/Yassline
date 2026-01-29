@@ -18,6 +18,9 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Confiar en el proxy (Railway, Nginx, etc.) para X-Forwarded-For y rate limiting
+app.set('trust proxy', 1);
+
 // Middleware
 // CORS configurado para permitir el frontend en producción
 const allowedOrigins = [
