@@ -253,74 +253,70 @@ exports.createBooking = async (req, res) => {
     
     await booking.save();
     console.log('✅ Booking guardado exitosamente:', booking._id);
-    
-    // Crear notificaciones para los administradores (no bloquear la respuesta si falla)
-    try {
-      const adminUsers = await User.find({ role: 'admin', active: true });
-      
-      if (adminUsers.length > 0) {
-        const notificationPromises = adminUsers.map(admin => 
-          Notification.create({
-            userId: admin._id,
-            type: 'new_booking',
-            title: 'Nueva Reserva Creada',
-            message: `Nueva reserva de ${booking.nombre} para ${booking.serviceName} (${booking.serviceType})`,
-            link: `/admin/bookings/${booking._id}`,
-            metadata: { 
-              bookingId: booking._id.toString(),
-              serviceName: booking.serviceName,
-              serviceType: booking.serviceType,
-              customerName: booking.nombre,
-              customerEmail: booking.email,
-            },
-          })
-        );
-        
-        await Promise.all(notificationPromises);
-        console.log(`✅ Notificaciones creadas para ${adminUsers.length} administrador(es)`);
-      }
-    } catch (notifError) {
-      console.error('Error creando notificaciones para admin:', notifError);
-      // No fallar la petición si las notificaciones fallan
-    }
-    
-    // Enviar notificaciones por email (no bloquear la respuesta si falla)
-    try {
-      // Notificación al administrador
-      await emailService.sendBookingNotification({
-        nombre: booking.nombre,
-        email: booking.email,
-        telefono: booking.telefono,
-        serviceName: booking.serviceName,
-        serviceType: booking.serviceType,
-        priceLabel: booking.priceLabel,
-        fecha: booking.fecha,
-        hora: booking.hora,
-        pasajeros: booking.pasajeros,
-        mensaje: booking.mensaje,
-        details: booking.details,
-      });
-      
-      // Confirmación al cliente
-      await emailService.sendBookingConfirmation({
-        nombre: booking.nombre,
-        email: booking.email,
-        serviceName: booking.serviceName,
-        serviceType: booking.serviceType,
-        priceLabel: booking.priceLabel,
-        fecha: booking.fecha,
-        hora: booking.hora,
-        pasajeros: booking.pasajeros,
-      });
-    } catch (emailError) {
-      console.error('Error enviando emails de reserva:', emailError);
-      // No fallar la petición si el email falla
-    }
-    
+
+    // Responder al cliente de inmediato para que pueda redirigir a la página de pago
+    // Incluir _id como string para que el frontend construya /pago/:id sin fallos
+    const dataForClient = { ...booking.toObject(), _id: booking._id.toString() };
     res.status(201).json({
       success: true,
       message: 'Solicitud de reserva enviada exitosamente',
-      data: booking,
+      data: dataForClient,
+    });
+
+    // Notificaciones y emails en segundo plano (no bloquear la respuesta)
+    setImmediate(async () => {
+      try {
+        const adminUsers = await User.find({ role: 'admin', active: true });
+        if (adminUsers.length > 0) {
+          const notificationPromises = adminUsers.map(admin =>
+            Notification.create({
+              userId: admin._id,
+              type: 'new_booking',
+              title: 'Nueva Reserva Creada',
+              message: `Nueva reserva de ${booking.nombre} para ${booking.serviceName} (${booking.serviceType})`,
+              link: `/admin/bookings/${booking._id}`,
+              metadata: {
+                bookingId: booking._id.toString(),
+                serviceName: booking.serviceName,
+                serviceType: booking.serviceType,
+                customerName: booking.nombre,
+                customerEmail: booking.email,
+              },
+            })
+          );
+          await Promise.all(notificationPromises);
+          console.log(`✅ Notificaciones creadas para ${adminUsers.length} administrador(es)`);
+        }
+      } catch (notifError) {
+        console.error('Error creando notificaciones para admin:', notifError);
+      }
+      try {
+        await emailService.sendBookingNotification({
+          nombre: booking.nombre,
+          email: booking.email,
+          telefono: booking.telefono,
+          serviceName: booking.serviceName,
+          serviceType: booking.serviceType,
+          priceLabel: booking.priceLabel,
+          fecha: booking.fecha,
+          hora: booking.hora,
+          pasajeros: booking.pasajeros,
+          mensaje: booking.mensaje,
+          details: booking.details,
+        });
+        await emailService.sendBookingConfirmation({
+          nombre: booking.nombre,
+          email: booking.email,
+          serviceName: booking.serviceName,
+          serviceType: booking.serviceType,
+          priceLabel: booking.priceLabel,
+          fecha: booking.fecha,
+          hora: booking.hora,
+          pasajeros: booking.pasajeros,
+        });
+      } catch (emailError) {
+        console.error('Error enviando emails de reserva:', emailError);
+      }
     });
   } catch (error) {
     console.error('❌ Error al crear reserva:', error);
@@ -725,21 +721,26 @@ exports.getBookingById = async (req, res) => {
 
 // GET /api/bookings/:id/for-payment - Obtener reserva para página de pago (público, sin auth)
 exports.getBookingByIdForPayment = async (req, res) => {
+  const id = req.params.id;
   try {
-    const booking = await Booking.findById(req.params.id);
+    console.log('📄 GET for-payment, id:', id);
+    const booking = await Booking.findById(id).lean();
     
     if (!booking) {
+      console.log('❌ for-payment: reserva no encontrada, id:', id);
       return res.status(404).json({
         success: false,
         message: 'Reserva no encontrada',
       });
     }
     
+    console.log('✅ for-payment: reserva encontrada, serviceName:', booking.serviceName);
     res.json({
       success: true,
-      data: booking,
+      data: { ...booking, _id: String(booking._id) },
     });
   } catch (error) {
+    console.error('❌ for-payment error:', error.message);
     res.status(500).json({
       success: false,
       message: 'Error al obtener reserva',
