@@ -134,19 +134,6 @@ const deductPointsForCancellation = async (booking) => {
       return;
     }
 
-    // Buscar si se otorgaron puntos por esta reserva (solo si estaba completada)
-    const pointsHistory = await PointsHistory.findOne({
-      userId: user._id,
-      bookingId: booking._id,
-      reason: 'booking_completed'
-    }).sort({ createdAt: -1 });
-
-    // Si no hay historial de puntos otorgados, no hay nada que restar
-    if (!pointsHistory) {
-      console.log(`ℹ️  No se encontraron puntos otorgados para la reserva ${booking._id}, no se restarán puntos`);
-      return;
-    }
-
     const pointsToDeduct = pointsHistory.points;
     const bookingPrice = booking.total || booking.calculatedPrice || 0;
 
@@ -711,8 +698,33 @@ exports.getAllBookings = async (req, res) => {
   }
 };
 
-// GET /api/bookings/:id - Obtener reserva por ID
+// GET /api/bookings/:id - Obtener reserva por ID (requiere auth)
 exports.getBookingById = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: 'Reserva no encontrada',
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: booking,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener reserva',
+      error: error.message,
+    });
+  }
+};
+
+// GET /api/bookings/:id/for-payment - Obtener reserva para página de pago (público, sin auth)
+exports.getBookingByIdForPayment = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);
     

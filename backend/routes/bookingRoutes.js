@@ -4,6 +4,7 @@ const {
   getAllBookings,
   getMyBookings,
   getBookingById,
+  getBookingByIdForPayment,
   createBooking,
   updateBooking,
   deleteBooking,
@@ -37,6 +38,9 @@ router.post('/', bookingRateLimiter, validateBooking, (req, res, next) => {
     next(); // Continuar sin autenticación
   }
 }, createBooking);
+
+// Ruta pública: datos de reserva para la página de pago (sin login)
+router.get('/:id/for-payment', validateBookingId, getBookingByIdForPayment);
 
 // Rutas protegidas
 router.get('/my', authenticateToken, getMyBookings); // Reservas del usuario autenticado
