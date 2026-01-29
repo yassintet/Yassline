@@ -29,6 +29,23 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Middleware opcional para autenticación (no falla si no hay token)
+const optionalAuth = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET || 'yassline-tour-secret-key-change-in-production', (err, user) => {
+      if (!err) {
+        req.user = user;
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+};
+
 // Middleware opcional para verificar si el usuario es admin
 const isAdmin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
@@ -43,5 +60,6 @@ const isAdmin = (req, res, next) => {
 
 module.exports = {
   authenticateToken,
+  optionalAuth,
   isAdmin,
 };

@@ -7,7 +7,11 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node scripts/seed.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed:rewards": "node scripts/seed-rewards.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:unit": "jest --testPathPattern=unit",
+    "test:integration": "jest --testPathPattern=integration",
     "test:mongodb": "node test-mongodb.js",
     "test:connection": "node test-mongodb.js",
     "test:driver": "node connect-driver.js",
@@ -21,7 +25,9 @@
     "test:standard": "node test-standard-format.js",
     "test:compass": "node test-compass-format.js",
     "test:exact": "node test-compass-exact.js",
-    "test:dns": "node test-dns-fix.js"
+    "test:dns": "node test-dns-fix.js",
+    "reminders:test": "node scripts/test-reminders.js",
+    "reminders:send": "node scripts/sendBookingReminders.js"
   },
   "keywords": [],
   "author": "",
@@ -33,9 +39,14 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-validator": "^7.0.1",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
     "mongoose": "^9.1.5",
-    "nodemon": "^3.1.11"
+    "nodemailer": "^7.0.12",
+    "nodemon": "^3.1.11",
+    "node-cron": "^3.0.3",
+    "pdfkit": "^0.14.0"
   }
 }

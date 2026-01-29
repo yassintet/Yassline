@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, getMe } = require('../controllers/authController');
+const { register, login, getMe, updateProfile, changePassword, forgotPassword, resetPassword } = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
 const { body } = require('express-validator');
 const { handleValidationErrors } = require('../middleware/validation');
+const { authRateLimiter, passwordResetRateLimiter } = require('../middleware/security');
 
 // Validaciones para registro
 const validateRegister = [
@@ -37,11 +38,26 @@ const validateLogin = [
   handleValidationErrors,
 ];
 
-// Rutas públicas
-router.post('/register', validateRegister, register);
-router.post('/login', validateLogin, login);
+// Rutas públicas con rate limiting
+router.post('/register', authRateLimiter, validateRegister, register);
+router.post('/login', authRateLimiter, validateLogin, login);
+router.post('/forgot-password', passwordResetRateLimiter, [
+  body('email').trim().notEmpty().withMessage('El email es requerido').isEmail().withMessage('Email inválido'),
+  handleValidationErrors,
+], forgotPassword);
+router.post('/reset-password', passwordResetRateLimiter, [
+  body('token').notEmpty().withMessage('El token es requerido'),
+  body('newPassword').isLength({ min: 6 }).withMessage('La contraseña debe tener al menos 6 caracteres'),
+  handleValidationErrors,
+], resetPassword);
 
-// Ruta protegida
+// Rutas protegidas
 router.get('/me', authenticateToken, getMe);
+router.put('/profile', authenticateToken, updateProfile);
+router.put('/change-password', authenticateToken, [
+  body('currentPassword').notEmpty().withMessage('La contraseña actual es requerida'),
+  body('newPassword').isLength({ min: 6 }).withMessage('La nueva contraseña debe tener al menos 6 caracteres'),
+  handleValidationErrors,
+], changePassword);
 
 module.exports = router;

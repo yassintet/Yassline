@@ -13,9 +13,10 @@ const {
   validateContactId,
   validateContactUpdate,
 } = require('../middleware/validation');
+const { contactRateLimiter } = require('../middleware/security');
 
-// Ruta pública (para formulario de contacto)
-router.post('/', validateContact, createContact);
+// Ruta pública (para formulario de contacto) con rate limiting
+router.post('/', contactRateLimiter, validateContact, createContact);
 
 // Rutas protegidas
 router.get('/', authenticateToken, getAllContacts);

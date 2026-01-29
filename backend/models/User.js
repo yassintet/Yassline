@@ -19,6 +19,14 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     match: [/^\S+@\S+\.\S+$/, 'Email inválido'],
   },
+  telefono: {
+    type: String,
+    trim: true,
+  },
+  nombre: {
+    type: String,
+    trim: true,
+  },
   password: {
     type: String,
     required: true,
@@ -32,6 +40,50 @@ const userSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true,
+  },
+  
+  // Sistema de puntos y beneficios (preparado para futuro)
+  points: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  totalSpent: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  totalBookings: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  membershipLevel: {
+    type: String,
+    enum: ['bronze', 'silver', 'gold', 'platinum', 'diamante'],
+    default: 'bronze',
+  },
+  rewards: [{
+    rewardId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Reward',
+    },
+    redeemedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    used: {
+      type: Boolean,
+      default: false,
+    },
+  }],
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null,
   },
 }, {
   timestamps: true,

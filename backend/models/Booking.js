@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
+  // Usuario asociado (opcional, para usuarios registrados)
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
+  
   // Información del cliente
   nombre: {
     type: String,
@@ -27,7 +34,7 @@ const bookingSchema = new mongoose.Schema({
   serviceType: {
     type: String,
     required: true,
-    enum: ['airport', 'intercity', 'hourly', 'custom'],
+    enum: ['airport', 'intercity', 'hourly', 'custom', 'vehicle'],
   },
   serviceId: {
     type: String,
@@ -52,6 +59,15 @@ const bookingSchema = new mongoose.Schema({
   },
   calculatedPrice: {
     type: Number,
+  },
+  proposedPrice: {
+    type: Number,
+  },
+  priceStatus: {
+    type: String,
+    enum: ['pending', 'accepted', 'rejected'],
+    default: null,
+    required: false,
   },
   
   // Detalles adicionales (JSON para flexibilidad)
@@ -95,10 +111,21 @@ const bookingSchema = new mongoose.Schema({
   total: {
     type: Number,
   },
+  paymentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Payment',
+    default: null,
+  },
   
   // Notas internas
   notes: {
     type: String,
+  },
+  
+  // Control de recordatorios
+  lastReminderSent: {
+    type: Date,
+    default: null,
   },
 }, {
   timestamps: true,
@@ -107,6 +134,7 @@ const bookingSchema = new mongoose.Schema({
 // Índices para búsquedas
 bookingSchema.index({ email: 1, createdAt: -1 });
 bookingSchema.index({ status: 1, createdAt: -1 });
+bookingSchema.index({ userId: 1, createdAt: -1 }); // Para búsquedas por usuario
 // Nota: reservationNumber e invoiceNumber tienen índices únicos definidos en los campos
 
 // Generar número de reserva antes de guardar si está confirmada

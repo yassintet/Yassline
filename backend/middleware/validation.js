@@ -1,5 +1,15 @@
 const { body, param, query, validationResult } = require('express-validator');
 
+// Función helper para sanitizar strings
+const sanitizeString = (value) => {
+  if (typeof value !== 'string') return value;
+  return value
+    .trim()
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remover scripts
+    .replace(/javascript:/gi, '') // Remover javascript:
+    .replace(/on\w+\s*=/gi, ''); // Remover event handlers
+};
+
 // Middleware para manejar errores de validación
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
@@ -16,9 +26,11 @@ const handleValidationErrors = (req, res, next) => {
 // Validaciones para Circuitos
 const validateCircuit = [
   body('name')
+    .customSanitizer(sanitizeString)
     .trim()
     .notEmpty().withMessage('El nombre es requerido')
-    .isLength({ min: 3, max: 100 }).withMessage('El nombre debe tener entre 3 y 100 caracteres'),
+    .isLength({ min: 3, max: 100 }).withMessage('El nombre debe tener entre 3 y 100 caracteres')
+    .matches(/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\-.,!?()]+$/).withMessage('El nombre contiene caracteres no permitidos'),
   
   body('title')
     .trim()
@@ -271,7 +283,7 @@ const validateBooking = [
     .notEmpty().withMessage('El nombre del servicio es requerido'),
   
   body('serviceType')
-    .isIn(['airport', 'intercity', 'hourly', 'custom']).withMessage('Tipo de servicio inválido'),
+    .isIn(['airport', 'intercity', 'hourly', 'custom', 'vehicle']).withMessage('Tipo de servicio inválido'),
   
   body('pasajeros')
     .optional()

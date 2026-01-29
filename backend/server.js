@@ -3,6 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const dns = require('dns');
+const {
+  setupHelmet,
+  generalRateLimiter,
+  distanceRateLimiter,
+  sanitizeInput,
+  securityLogger,
+  validatePayloadSize,
+} = require('./middleware/security');
 
 // Configurar DNS alternativo para resolver SRV (Google DNS y Cloudflare)
 dns.setServers(['8.8.8.8', '1.1.1.1']);
@@ -30,8 +38,21 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Configurar Helmet para headers de seguridad (ANTES de otros middlewares)
+app.use(setupHelmet());
+
+// Validar tamaño de payload (ANTES de body parser)
+app.use(validatePayloadSize(5 * 1024 * 1024)); // 5MB máximo
+
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+
+// Rate limiting general (aplicar a todas las rutas)
+app.use('/api', generalRateLimiter);
+
+// Sanitización de inputs y logging de seguridad
+app.use(sanitizeInput);
+app.use(securityLogger);
 
 // Middleware de depuración para ver todas las peticiones
 app.use((req, res, next) => {
@@ -515,6 +536,28 @@ try {
   const bookingRoutes = require('./routes/bookingRoutes');
   console.log('✅ bookingRoutes importado');
   
+  console.log('📦 Importando pointsRoutes...');
+  const pointsRoutes = require('./routes/pointsRoutes');
+  console.log('✅ pointsRoutes importado');
+  
+  console.log('📦 Importando userRoutes...');
+  const userRoutes = require('./routes/userRoutes');
+  console.log('✅ userRoutes importado');
+  
+  console.log('📦 Importando searchRoutes...');
+  const searchRoutes = require('./routes/searchRoutes');
+  console.log('✅ searchRoutes importado');
+  
+  console.log('📦 Importando analyticsRoutes...');
+  const analyticsRoutes = require('./routes/analyticsRoutes');
+  console.log('✅ analyticsRoutes importado');
+  
+  console.log('📦 Importando paymentRoutes...');
+  const paymentRoutes = require('./routes/paymentRoutes');
+  console.log('✅ paymentRoutes importado');
+  console.log('📋 Tipo de paymentRoutes:', typeof paymentRoutes);
+  console.log('📋 paymentRoutes es función:', typeof paymentRoutes === 'function');
+  
   console.log('✅ Todas las rutas importadas correctamente');
   
   // Rutas de la API
@@ -534,11 +577,27 @@ try {
   app.use('/api/vehicles', vehicleRoutes);
   console.log('✅ /api/vehicles registrado');
   
-  app.use('/api/distance', distanceRoutes);
+  // Aplicar rate limiter específico para distancias (más permisivo)
+  app.use('/api/distance', distanceRateLimiter, distanceRoutes);
   console.log('✅ /api/distance registrado');
   
   app.use('/api/bookings', bookingRoutes);
   console.log('✅ /api/bookings registrado');
+  
+  app.use('/api/points', pointsRoutes);
+  console.log('✅ /api/points registrado');
+  
+  app.use('/api/users', userRoutes);
+  console.log('✅ /api/users registrado');
+  
+  app.use('/api/search', searchRoutes);
+  console.log('✅ /api/search registrado');
+  
+  app.use('/api/analytics', analyticsRoutes);
+  console.log('✅ /api/analytics registrado');
+  
+  app.use('/api/payments', paymentRoutes);
+  console.log('✅ /api/payments registrado');
   
   console.log('✅ Todas las rutas registradas en Express');
 } catch (error) {
@@ -563,12 +622,69 @@ app.use((req, res, next) => {
       vehicles: '/api/vehicles',
       distance: '/api/distance',
       bookings: '/api/bookings',
+      payments: '/api/payments',
+      points: '/api/points',
+      users: '/api/users',
+      search: '/api/search',
+      analytics: '/api/analytics',
     }
   });
 });
 
+// Sistema de recordatorios automáticos
+let cronJob = null;
+const setupReminderCron = () => {
+  try {
+    const cron = require('node-cron');
+    
+    // Ejecutar todos los días a las 9:00 AM
+    // Formato: minuto hora día mes día-semana
+    cronJob = cron.schedule('0 9 * * *', async () => {
+      console.log('📧 Ejecutando tarea programada: Envío de recordatorios de reservas');
+      try {
+        const { sendReminders } = require('./scripts/sendBookingReminders');
+        await sendReminders();
+      } catch (error) {
+        console.error('❌ Error ejecutando recordatorios:', error);
+      }
+    }, {
+      scheduled: true,
+      timezone: "Africa/Casablanca" // Zona horaria de Marruecos
+    });
+    
+    console.log('✅ Sistema de recordatorios automáticos configurado (diario a las 9:00 AM)');
+  } catch (error) {
+    // Si node-cron no está instalado, usar setInterval como alternativa
+    console.warn('⚠️  node-cron no disponible, usando setInterval para recordatorios');
+    console.warn('💡 Instala node-cron con: npm install node-cron');
+    
+    // Ejecutar cada 24 horas (86400000 ms)
+    setInterval(async () => {
+      console.log('📧 Ejecutando tarea programada: Envío de recordatorios de reservas');
+      try {
+        const { sendReminders } = require('./scripts/sendBookingReminders');
+        await sendReminders();
+      } catch (error) {
+        console.error('❌ Error ejecutando recordatorios:', error);
+      }
+    }, 24 * 60 * 60 * 1000); // 24 horas
+    
+    console.log('✅ Sistema de recordatorios automáticos configurado (cada 24 horas)');
+  }
+};
+
 // Iniciar servidor
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`✅ Yassline Tour API está lista para recibir peticiones`);
+  
+  // Configurar sistema de recordatorios después de conectar a la base de datos
+  if (mongoose.connection.readyState === 1) {
+    setupReminderCron();
+  } else {
+    // Esperar a que se conecte la base de datos
+    mongoose.connection.once('connected', () => {
+      setupReminderCron();
+    });
+  }
 });

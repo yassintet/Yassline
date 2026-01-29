@@ -2,9 +2,18 @@ const nodemailer = require('nodemailer');
 
 // Configuración del transporter de email
 const createTransporter = () => {
-  // Si hay configuración SMTP personalizada, usarla
-  if (process.env.SMTP_HOST && process.env.SMTP_PORT) {
-    console.log('📧 Usando configuración SMTP personalizada:', process.env.SMTP_HOST);
+  // Validar que SMTP_HOST no sea un placeholder
+  const smtpHost = process.env.SMTP_HOST;
+  const isPlaceholder = smtpHost && (
+    smtpHost === 'smtp.tu-servidor.com' ||
+    smtpHost.includes('tu-servidor') ||
+    smtpHost.includes('example.com') ||
+    smtpHost.includes('placeholder')
+  );
+  
+  // Si hay configuración SMTP personalizada válida, usarla
+  if (smtpHost && process.env.SMTP_PORT && !isPlaceholder) {
+    console.log('📧 Usando configuración SMTP personalizada:', smtpHost);
     return nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT),
@@ -28,6 +37,12 @@ const createTransporter = () => {
     });
   }
   
+  // Si hay SMTP_HOST pero es un placeholder, advertir y usar Gmail
+  if (isPlaceholder) {
+    console.warn('⚠️ SMTP_HOST está configurado con un valor placeholder:', smtpHost);
+    console.warn('⚠️ Usando Gmail SMTP en su lugar. Configura SMTP_HOST con un valor válido para usar SMTP personalizado.');
+  }
+  
   // Por defecto, usar Gmail SMTP
   const emailUser = process.env.EMAIL_USER || process.env.GMAIL_USER;
   const emailPass = process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD;
@@ -40,28 +55,31 @@ const createTransporter = () => {
   console.log('📧 Usando Gmail SMTP con usuario:', emailUser);
   
   // Configuración mejorada para Gmail con opciones de conexión más robustas
+  // Intentar primero con puerto 465 (SSL) que suele funcionar mejor en servidores cloud
   return nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true para 465, false para otros puertos
+    port: 465,
+    secure: true, // true para puerto 465 (SSL)
     auth: {
       user: emailUser,
       pass: emailPass,
     },
     // Opciones adicionales para mejorar la conexión
-    connectionTimeout: 60000, // 60 segundos
+    connectionTimeout: 30000, // 30 segundos
     greetingTimeout: 30000, // 30 segundos
-    socketTimeout: 60000, // 60 segundos
-    // Configuración TLS
+    socketTimeout: 30000, // 30 segundos
+    // Configuración TLS/SSL
     tls: {
       rejectUnauthorized: false, // Permitir certificados autofirmados si es necesario
-      ciphers: 'SSLv3',
+      minVersion: 'TLSv1.2',
     },
     // Reintentos
-    pool: true,
+    pool: false, // Desactivar pool para evitar problemas de conexión
     maxConnections: 1,
-    maxMessages: 3,
+    maxMessages: 1,
+    // Opciones adicionales
+    requireTLS: true,
+    debug: false, // Cambiar a true para ver más detalles en los logs
   });
 };
 
@@ -455,6 +473,297 @@ exports.sendReservationConfirmed = async (reservationData, invoiceBuffer) => {
     text: `Hola ${reservationData.nombre}, tu reserva ha sido confirmada. Número de reserva: ${reservationData.reservationNumber || 'N/A'}`,
     attachments,
   });
+};
+
+/**
+ * Notificación de cancelación de reserva al cliente
+ */
+exports.sendBookingCancellation = async (bookingData) => {
+  const content = `
+    <h2>Reserva Cancelada</h2>
+    <p>Hola <strong>${bookingData.nombre}</strong>,</p>
+    <p>Te informamos que tu reserva ha sido cancelada.</p>
+    
+    <div class="info-box">
+      <p><strong>Detalles de la reserva cancelada:</strong></p>
+      <p><strong>Número de reserva:</strong> ${bookingData.reservationNumber || 'N/A'}</p>
+      <p><strong>Servicio:</strong> ${bookingData.serviceName || 'N/A'}</p>
+      ${bookingData.fecha ? `<p><strong>Fecha:</strong> ${bookingData.fecha}</p>` : ''}
+      ${bookingData.hora ? `<p><strong>Hora:</strong> ${bookingData.hora}</p>` : ''}
+      ${bookingData.total ? `<p><strong>Total:</strong> ${bookingData.total} MAD</p>` : ''}
+    </div>
+    
+    ${bookingData.reason ? `
+    <div class="info-box">
+      <p><strong>Motivo de cancelación:</strong></p>
+      <p>${bookingData.reason}</p>
+    </div>
+    ` : ''}
+    
+    <p>Si tienes alguna pregunta sobre esta cancelación o deseas realizar una nueva reserva, no dudes en contactarnos:</p>
+    <ul>
+      <li>Email: ${COMPANY_EMAIL}</li>
+      <li>Teléfono: ${COMPANY_PHONE}</li>
+    </ul>
+    
+    <p>Esperamos poder servirte en el futuro.</p>
+    <p>Saludos cordiales,<br>El equipo de ${COMPANY_NAME}</p>
+  `;
+
+  return await sendEmail({
+    to: bookingData.email,
+    subject: `Reserva cancelada - ${bookingData.reservationNumber || 'N/A'}`,
+    html: getBaseTemplate(content, 'Reserva Cancelada'),
+    text: `Hola ${bookingData.nombre}, tu reserva ha sido cancelada. Número de reserva: ${bookingData.reservationNumber || 'N/A'}`,
+  });
+};
+
+/**
+ * Notificación de precio propuesto por la administración
+ */
+exports.sendPriceProposal = async (bookingData) => {
+  const content = `
+    <h2>Precio Propuesto para tu Reserva</h2>
+    <p>Hola <strong>${bookingData.nombre}</strong>,</p>
+    <p>Hemos revisado tu solicitud de reserva y te proponemos el siguiente precio:</p>
+    
+    <div class="info-box" style="background-color: #e8f5e9; border-left: 4px solid #4caf50;">
+      <p style="font-size: 18px; margin: 10px 0;"><strong>Precio Propuesto:</strong></p>
+      <p style="font-size: 32px; font-weight: bold; color: #2e7d32; margin: 15px 0;">
+        ${bookingData.proposedPrice ? bookingData.proposedPrice.toLocaleString() : 'N/A'} MAD
+      </p>
+    </div>
+    
+    <div class="info-box">
+      <p><strong>Detalles de tu reserva:</strong></p>
+      <p><strong>Número de reserva:</strong> ${bookingData.reservationNumber || 'Pendiente'}</p>
+      <p><strong>Servicio:</strong> ${bookingData.serviceName || 'N/A'}</p>
+      ${bookingData.fecha ? `<p><strong>Fecha:</strong> ${bookingData.fecha}</p>` : ''}
+      ${bookingData.hora ? `<p><strong>Hora:</strong> ${bookingData.hora}</p>` : ''}
+      ${bookingData.pasajeros ? `<p><strong>Pasajeros:</strong> ${bookingData.pasajeros}</p>` : ''}
+    </div>
+    
+    ${bookingData.priceMessage ? `
+    <div class="info-box">
+      <p><strong>Mensaje adicional:</strong></p>
+      <p>${bookingData.priceMessage}</p>
+    </div>
+    ` : ''}
+    
+    <p><strong>Por favor, revisa este precio y confirma si estás de acuerdo.</strong></p>
+    
+    <p>Puedes aceptar o rechazar este precio desde tu panel de reservas:</p>
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/mis-reservas" class="button" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">
+        Ver Mis Reservas
+      </a>
+    </div>
+    
+    <p>Si tienes alguna pregunta sobre este precio o deseas negociar, no dudes en contactarnos:</p>
+    <ul>
+      <li>Email: ${COMPANY_EMAIL}</li>
+      <li>Teléfono: ${COMPANY_PHONE}</li>
+    </ul>
+    
+    <p>Esperamos tu respuesta para proceder con la confirmación de tu reserva.</p>
+    <p>Saludos cordiales,<br>El equipo de ${COMPANY_NAME}</p>
+  `;
+
+  return await sendEmail({
+    to: bookingData.email,
+    subject: `Precio propuesto para tu reserva - ${bookingData.reservationNumber || 'N/A'}`,
+    html: getBaseTemplate(content, 'Precio Propuesto'),
+    text: `Hola ${bookingData.nombre}, te proponemos un precio de ${bookingData.proposedPrice ? bookingData.proposedPrice.toLocaleString() : 'N/A'} MAD para tu reserva de ${bookingData.serviceName || 'N/A'}.`,
+  });
+};
+
+/**
+ * Notificación de actualización de reserva al cliente
+ */
+exports.sendBookingUpdate = async (bookingData, changes) => {
+  const changesList = Object.keys(changes).map(key => {
+    const labels = {
+      fecha: 'Fecha',
+      hora: 'Hora',
+      pasajeros: 'Número de Pasajeros',
+      mensaje: 'Mensaje',
+      total: 'Precio Total',
+      status: 'Estado',
+    };
+    return `<li><strong>${labels[key] || key}:</strong> ${changes[key].old} → ${changes[key].new}</li>`;
+  }).join('');
+
+  const content = `
+    <h2>Reserva Actualizada</h2>
+    <p>Hola <strong>${bookingData.nombre}</strong>,</p>
+    <p>Te informamos que tu reserva ha sido actualizada.</p>
+    
+    <div class="info-box">
+      <p><strong>Detalles de la reserva:</strong></p>
+      <p><strong>Número de reserva:</strong> ${bookingData.reservationNumber || 'N/A'}</p>
+      <p><strong>Servicio:</strong> ${bookingData.serviceName || 'N/A'}</p>
+    </div>
+    
+    <div class="info-box">
+      <p><strong>Cambios realizados:</strong></p>
+      <ul style="margin: 10px 0; padding-left: 20px;">
+        ${changesList}
+      </ul>
+    </div>
+    
+    <div class="info-box">
+      <p><strong>Información actualizada de tu reserva:</strong></p>
+      ${bookingData.fecha ? `<p><strong>Fecha:</strong> ${bookingData.fecha}</p>` : ''}
+      ${bookingData.hora ? `<p><strong>Hora:</strong> ${bookingData.hora}</p>` : ''}
+      ${bookingData.pasajeros ? `<p><strong>Pasajeros:</strong> ${bookingData.pasajeros}</p>` : ''}
+      ${bookingData.total ? `<p><strong>Total:</strong> ${bookingData.total} MAD</p>` : ''}
+      ${bookingData.status ? `<p><strong>Estado:</strong> ${bookingData.status}</p>` : ''}
+    </div>
+    
+    <p>Si tienes alguna pregunta sobre estos cambios o necesitas realizar alguna modificación adicional, no dudes en contactarnos:</p>
+    <ul>
+      <li>Email: ${COMPANY_EMAIL}</li>
+      <li>Teléfono: ${COMPANY_PHONE}</li>
+    </ul>
+    
+    <p>Saludos cordiales,<br>El equipo de ${COMPANY_NAME}</p>
+  `;
+
+  return await sendEmail({
+    to: bookingData.email,
+    subject: `Reserva actualizada - ${bookingData.reservationNumber || 'N/A'}`,
+    html: getBaseTemplate(content, 'Reserva Actualizada'),
+    text: `Hola ${bookingData.nombre}, tu reserva ha sido actualizada. Número de reserva: ${bookingData.reservationNumber || 'N/A'}`,
+  });
+};
+
+/**
+ * Recordatorio de reserva próxima al cliente
+ */
+exports.sendBookingReminder = async (bookingData) => {
+  const content = `
+    <h2>Recordatorio de Reserva</h2>
+    <p>Hola <strong>${bookingData.nombre}</strong>,</p>
+    <p>Te recordamos que tienes una reserva confirmada con nosotros.</p>
+    
+    <div class="info-box">
+      <p><strong>Detalles de tu reserva:</strong></p>
+      <p><strong>Número de reserva:</strong> ${bookingData.reservationNumber || 'N/A'}</p>
+      <p><strong>Servicio:</strong> ${bookingData.serviceName || 'N/A'}</p>
+      ${bookingData.fecha ? `<p><strong>Fecha:</strong> ${bookingData.fecha}</p>` : ''}
+      ${bookingData.hora ? `<p><strong>Hora:</strong> ${bookingData.hora}</p>` : ''}
+      ${bookingData.pasajeros ? `<p><strong>Pasajeros:</strong> ${bookingData.pasajeros}</p>` : ''}
+      ${bookingData.total ? `<p><strong>Total:</strong> ${bookingData.total} MAD</p>` : ''}
+    </div>
+    
+    ${bookingData.routeData ? `
+    <div class="info-box">
+      <p><strong>Ruta:</strong></p>
+      <p>${bookingData.routeData.from || ''} → ${bookingData.routeData.to || ''}</p>
+    </div>
+    ` : ''}
+    
+    <p><strong>Por favor, asegúrate de estar listo a la hora indicada.</strong></p>
+    
+    <p>Si necesitas modificar o cancelar tu reserva, contacta con nosotros lo antes posible:</p>
+    <ul>
+      <li>Email: ${COMPANY_EMAIL}</li>
+      <li>Teléfono: ${COMPANY_PHONE}</li>
+    </ul>
+    
+    <p>¡Esperamos verte pronto!</p>
+    <p>Saludos cordiales,<br>El equipo de ${COMPANY_NAME}</p>
+  `;
+
+  return await sendEmail({
+    to: bookingData.email,
+    subject: `Recordatorio de reserva - ${bookingData.serviceName || 'N/A'}`,
+    html: getBaseTemplate(content, 'Recordatorio de Reserva'),
+    text: `Hola ${bookingData.nombre}, te recordamos tu reserva del ${bookingData.fecha || 'N/A'} a las ${bookingData.hora || 'N/A'}.`,
+  });
+};
+
+// Enviar email de recuperación de contraseña
+exports.sendPasswordReset = async ({ nombre, email, resetUrl }) => {
+  try {
+    const transporter = createTransporter();
+    if (!transporter) {
+      console.warn('⚠️ No se puede enviar email de recuperación: servicio de email no configurado');
+      return;
+    }
+
+    const mailOptions = {
+      from: `"${process.env.EMAIL_FROM_NAME || 'Yassline Tour'}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@yassline.com'}>`,
+      to: email,
+      subject: 'Recuperación de Contraseña - Yassline Tour',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Recuperación de Contraseña</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0;">Yassline Tour</h1>
+          </div>
+          
+          <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #333; margin-top: 0;">Recuperación de Contraseña</h2>
+            
+            <p>Hola ${nombre || 'Usuario'},</p>
+            
+            <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Yassline Tour.</p>
+            
+            <p>Si solicitaste este cambio, haz clic en el siguiente botón para restablecer tu contraseña:</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                Restablecer Contraseña
+              </a>
+            </div>
+            
+            <p style="font-size: 12px; color: #666;">O copia y pega este enlace en tu navegador:</p>
+            <p style="font-size: 12px; color: #666; word-break: break-all;">${resetUrl}</p>
+            
+            <p><strong>Este enlace expirará en 1 hora.</strong></p>
+            
+            <p>Si no solicitaste este cambio, puedes ignorar este email de forma segura. Tu contraseña no será modificada.</p>
+            
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+            
+            <p style="font-size: 12px; color: #666; margin-bottom: 0;">
+              Este es un email automático, por favor no respondas a este mensaje.<br>
+              Si tienes alguna pregunta, contacta a nuestro equipo de soporte.
+            </p>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+        Recuperación de Contraseña - Yassline Tour
+        
+        Hola ${nombre || 'Usuario'},
+        
+        Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Yassline Tour.
+        
+        Si solicitaste este cambio, visita el siguiente enlace para restablecer tu contraseña:
+        ${resetUrl}
+        
+        Este enlace expirará en 1 hora.
+        
+        Si no solicitaste este cambio, puedes ignorar este email de forma segura. Tu contraseña no será modificada.
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email de recuperación de contraseña enviado:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('❌ Error enviando email de recuperación de contraseña:', error);
+    throw error;
+  }
 };
 
 module.exports = exports;

@@ -19,7 +19,7 @@ const sampleCircuits = [
     duration: '5 Días / 4 Noches',
     price: 450,
     priceLabel: 'Desde 450€ / persona',
-    image: '/images/circuits/imperial.jpg',
+    image: '/img/Marrakech-cityf.jpg',
     itinerary: [
       {
         day: 1,
@@ -64,7 +64,7 @@ const sampleCircuits = [
     duration: '3 Días / 2 Noches',
     price: 320,
     priceLabel: 'Desde 320€ / persona',
-    image: '/images/circuits/desert.jpg',
+    image: '/img/Dades hotel xaluca.jpg',
     itinerary: [
       {
         day: 1,
@@ -99,7 +99,7 @@ const sampleCircuits = [
     duration: '4 Días / 3 Noches',
     price: 380,
     priceLabel: 'Desde 380€ / persona',
-    image: '/images/circuits/coast.jpg',
+    image: '/img/Ourika_Valley.jpg',
     itinerary: [
       {
         day: 1,
@@ -137,13 +137,13 @@ const sampleTransports = [
   {
     type: 'airport',
     name: 'Traslado Aeropuerto',
-    description: 'Servicio de traslado desde/hacia el aeropuerto de Marrakech. Disponible 24/7 con vehículos cómodos y seguros.',
+    description: 'Servicio de traslado desde/hacia el aeropuerto. Precio fijo de 40€ para traslados a la ciudad del aeropuerto. Para otras ciudades, se aplican tarifas inter-ciudades + 5€ de suplemento. Disponible 24/7 con vehículos cómodos y seguros.',
     icon: 'plane',
-    price: 50,
-    priceLabel: 'Desde 50€',
+    price: 435,
+    priceLabel: 'Desde 40€',
     route: {
-      from: 'Aeropuerto Marrakech',
-      to: 'Centro de Marrakech',
+      from: 'Aeropuerto',
+      to: 'Ciudad',
     },
     active: true,
   },
@@ -163,10 +163,10 @@ const sampleTransports = [
   {
     type: 'hourly',
     name: 'Servicio por Horas',
-    description: 'Alquila un vehículo con chofer por horas. Perfecto para tours personalizados, compras o eventos.',
+    description: 'Alquila un vehículo con chofer por horas. Perfecto para tours personalizados, compras o eventos. El servicio incluye chofer profesional, vehículo de lujo Mercedes-Benz, seguro de viaje y todos los servicios premium. Los precios varían según el tipo de vehículo y las horas contratadas. Se aplican suplementos para servicios cortos: +30% para 1-2 horas y +20% para 3-4 horas. A partir de 5 horas, el precio es sin suplementos adicionales.',
     icon: 'clock',
-    price: 40,
-    priceLabel: 'Desde 40€/hora',
+    price: 187.5,
+    priceLabel: 'Desde 187 dirhams la hora',
     route: {
       from: 'Marrakech',
       to: 'Personalizado',
@@ -193,11 +193,11 @@ const sampleVehicles = [
     name: 'Mercedes V-Class',
     type: 'v-class',
     capacity: {
-      passengers: 7,
+      passengers: 6,
       luggage: '2 maletas grandes',
     },
     description: 'Vehículo de lujo con todas las comodidades. Ideal para grupos pequeños que buscan máximo confort.',
-    image: '/images/fleet/v-class.jpg',
+    image: '/img/v-class1.jpg',
     features: [
       'WiFi gratuito',
       'Aire acondicionado',
@@ -211,11 +211,11 @@ const sampleVehicles = [
     name: 'Mercedes Vito',
     type: 'vito',
     capacity: {
-      passengers: 8,
+      passengers: 7,
       luggage: '3 maletas medianas',
     },
     description: 'Vehículo espacioso y confortable, perfecto para familias o grupos medianos.',
-    image: '/images/fleet/vito.jpg',
+    image: '/img/vito (6).jpg',
     features: [
       'WiFi gratuito',
       'Aire acondicionado',
@@ -228,11 +228,11 @@ const sampleVehicles = [
     name: 'Mercedes Sprinter',
     type: 'sprinter',
     capacity: {
-      passengers: 16,
+      passengers: 18,
       luggage: '8 maletas grandes',
     },
     description: 'Vehículo de gran capacidad para grupos grandes. Equipado con todas las comodidades modernas.',
-    image: '/images/fleet/sprinter.jpg',
+    image: '/img/sprinter (4).jpg',
     features: [
       'WiFi gratuito',
       'Aire acondicionado',
