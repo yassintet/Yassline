@@ -17,16 +17,20 @@ const { authenticateToken, optionalAuth, isAdmin } = require('../middleware/auth
 const { body } = require('express-validator');
 const { handleValidationErrors } = require('../middleware/validation');
 
-// Validaciones para crear pago
+// Validaciones para crear pago (amount puede venir como número o string desde JSON)
 const validateCreatePayment = [
   body('bookingId')
+    .trim()
     .notEmpty().withMessage('El ID de reserva es requerido')
     .isMongoId().withMessage('ID de reserva inválido'),
   body('paymentMethod')
+    .trim()
     .notEmpty().withMessage('El método de pago es requerido')
     .isIn(['cash', 'bank_transfer', 'binance', 'redotpay', 'moneygram']).withMessage('Método de pago inválido'),
   body('amount')
-    .notEmpty().withMessage('El monto es requerido')
+    .custom((val) => val !== undefined && val !== null && val !== '')
+    .withMessage('El monto es requerido')
+    .toFloat()
     .isFloat({ min: 0.01 }).withMessage('El monto debe ser mayor a 0'),
   body('currency')
     .optional()
