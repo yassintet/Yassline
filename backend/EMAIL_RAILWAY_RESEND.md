@@ -6,6 +6,16 @@ Este proyecto soporta **Resend**: solo necesitas una API key y no hace falta SMT
 
 ---
 
+## ⚠️ Plan gratis / testing: solo enviar a tu propio email
+
+En plan **gratis o de pruebas**, Resend **solo permite enviar al email de la cuenta** (el que usaste al registrarte en resend.com). Si intentas enviar a otros (clientes, admin@yassline.com), Resend devuelve **403** con el mensaje:
+
+> "You can only send testing emails to your own email address. To send emails to other recipients, please verify a domain at resend.com/domains."
+
+**Solución:** Verifica tu dominio (yassline.com) en [resend.com/domains](https://resend.com/domains), añade los registros DNS que te indiquen, y luego en Railway pon `RESEND_FROM=Yassline Tour <info@yassline.com>` (o `noreply@yassline.com`). Después de verificar el dominio podrás enviar a cualquier destinatario.
+
+---
+
 ## 1. Crear cuenta y API key en Resend
 
 1. Entra en **[resend.com](https://resend.com)** y crea una cuenta (gratis).

@@ -205,7 +205,7 @@ const sendEmail = async ({ to, subject, html, text, attachments = [] }) => {
 };
 
 /**
- * Template HTML base para emails
+ * Template HTML base para emails — profesional, elegante y moderno (Yassline)
  */
 const getBaseTemplate = (content, title) => {
   return `
@@ -216,85 +216,140 @@ const getBaseTemplate = (content, title) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${title}</title>
   <style>
+    * { box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.65;
+      color: #374151;
+      margin: 0;
+      padding: 0;
+      background-color: #f8fafc;
+    }
+    .wrapper {
       max-width: 600px;
       margin: 0 auto;
-      padding: 20px;
-      background-color: #f4f4f4;
+      padding: 40px 20px;
     }
     .container {
-      background-color: #ffffff;
-      border-radius: 10px;
-      padding: 30px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
     .header {
-      background: linear-gradient(135deg, #0066CC 0%, #004499 100%);
-      color: white;
-      padding: 30px;
-      border-radius: 10px 10px 0 0;
-      margin: -30px -30px 30px -30px;
-      text-align: center;
+      padding: 36px 40px 32px;
+      border-bottom: 3px solid #FF385C;
+      text-align: left;
     }
     .header h1 {
       margin: 0;
       font-size: 24px;
+      font-weight: 600;
+      color: #111827;
+      letter-spacing: -0.025em;
+    }
+    .header .subtitle {
+      margin: 8px 0 0 0;
+      font-size: 13px;
+      color: #6b7280;
+      font-weight: 400;
     }
     .content {
-      margin: 20px 0;
+      padding: 36px 40px 40px;
+      font-size: 15px;
+    }
+    .content h2 {
+      margin: 0 0 20px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      letter-spacing: -0.02em;
+    }
+    .content p {
+      margin: 0 0 14px 0;
+      color: #4b5563;
+      line-height: 1.7;
+    }
+    .content p:last-of-type { margin-bottom: 0; }
+    .content ul {
+      margin: 14px 0;
+      padding-left: 22px;
+      color: #4b5563;
+      line-height: 1.7;
     }
     .footer {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
+      padding: 24px 40px 28px;
+      background: #fafafa;
       text-align: center;
-      color: #666;
-      font-size: 12px;
+      color: #9ca3af;
+      font-size: 11px;
+      letter-spacing: 0.02em;
     }
+    .footer p { margin: 0; }
+    .footer a { color: #6b7280; text-decoration: none; }
     .button {
       display: inline-block;
-      padding: 12px 30px;
-      background: linear-gradient(135deg, #FF385C 0%, #E01E4F 100%);
-      color: white;
+      padding: 14px 28px;
+      background-color: #FF385C;
+      color: #ffffff !important;
       text-decoration: none;
-      border-radius: 5px;
-      margin: 20px 0;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      margin: 20px 0 0 0;
     }
     .info-box {
-      background-color: #f8f9fa;
-      border-left: 4px solid #0066CC;
-      padding: 15px;
-      margin: 15px 0;
-      border-radius: 4px;
+      background: #fafafa;
+      border-left: 4px solid #FF385C;
+      border-radius: 0 8px 8px 0;
+      padding: 20px 24px;
+      margin: 24px 0;
     }
+    .info-box p { margin: 0 0 10px 0; color: #374151; line-height: 1.65; }
+    .info-box p:last-child { margin-bottom: 0; }
+    .info-box strong { color: #111827; font-weight: 600; }
     .detail-row {
-      margin: 10px 0;
-      padding: 10px;
-      background-color: #f8f9fa;
-      border-radius: 4px;
+      padding: 14px 0;
+      border-bottom: 1px solid #f3f4f6;
+      margin: 0;
     }
+    .detail-row:last-child { border-bottom: none; }
     .detail-label {
-      font-weight: bold;
-      color: #0066CC;
-      display: inline-block;
-      min-width: 150px;
+      font-weight: 600;
+      color: #6b7280;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: block;
+      margin-bottom: 4px;
     }
+    .detail-row span:not(.detail-label) { color: #111827; font-size: 15px; }
+    .detail-row div { margin-top: 8px; color: #374151; white-space: pre-wrap; line-height: 1.6; }
+    .highlight {
+      background: #fafafa;
+      border-left: 4px solid #FF385C;
+      border-radius: 0 8px 8px 0;
+      padding: 20px 24px;
+      margin: 24px 0;
+    }
+    .highlight p { margin: 0 0 8px 0; color: #374151; }
+    .highlight p:last-child { margin-bottom: 0; }
+    .divider { height: 1px; background: #f3f4f6; margin: 28px 0; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>${COMPANY_NAME}</h1>
-    </div>
-    <div class="content">
-      ${content}
-    </div>
-    <div class="footer">
-      <p>© ${new Date().getFullYear()} ${COMPANY_NAME}. Todos los derechos reservados.</p>
-      <p>Este es un email automático, por favor no responda directamente.</p>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <h1>${COMPANY_NAME}</h1>
+        <p class="subtitle">${title}</p>
+      </div>
+      <div class="content">
+        ${content}
+      </div>
+      <div class="footer">
+        <p>© ${new Date().getFullYear()} ${COMPANY_NAME} · ${COMPANY_EMAIL}</p>
+      </div>
     </div>
   </div>
 </body>
