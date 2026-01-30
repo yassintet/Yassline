@@ -291,7 +291,7 @@ exports.createBooking = async (req, res) => {
         console.error('Error creando notificaciones para admin:', notifError);
       }
       try {
-        await emailService.sendBookingNotification({
+        const notifResult = await emailService.sendBookingNotification({
           nombre: booking.nombre,
           email: booking.email,
           telefono: booking.telefono,
@@ -304,7 +304,12 @@ exports.createBooking = async (req, res) => {
           mensaje: booking.mensaje,
           details: booking.details,
         });
-        await emailService.sendBookingConfirmation({
+        if (!notifResult || !notifResult.success) {
+          console.error('❌ Email de notificación (admin) no enviado:', notifResult?.error || 'sin resultado');
+        } else {
+          console.log('✅ Email de notificación enviado al admin');
+        }
+        const confResult = await emailService.sendBookingConfirmation({
           nombre: booking.nombre,
           email: booking.email,
           serviceName: booking.serviceName,
@@ -314,8 +319,13 @@ exports.createBooking = async (req, res) => {
           hora: booking.hora,
           pasajeros: booking.pasajeros,
         });
+        if (!confResult || !confResult.success) {
+          console.error('❌ Email de confirmación (cliente) no enviado:', confResult?.error || 'sin resultado');
+        } else {
+          console.log('✅ Email de confirmación enviado al cliente');
+        }
       } catch (emailError) {
-        console.error('Error enviando emails de reserva:', emailError);
+        console.error('❌ Excepción enviando emails de reserva:', emailError?.message || emailError);
       }
     });
   } catch (error) {
@@ -419,7 +429,7 @@ exports.confirmBooking = async (req, res) => {
     
     // Enviar confirmación con factura al cliente
     try {
-      await emailService.sendReservationConfirmed({
+      const emailResult = await emailService.sendReservationConfirmed({
         nombre: booking.nombre,
         email: booking.email,
         reservationNumber: booking.reservationNumber,
@@ -428,10 +438,13 @@ exports.confirmBooking = async (req, res) => {
         hora: booking.hora,
         total: booking.total || booking.calculatedPrice || 0,
       }, invoiceBuffer);
-      console.log('✅ Email de confirmación enviado a:', booking.email);
+      if (!emailResult || !emailResult.success) {
+        console.error('❌ Email de reserva confirmada no enviado:', emailResult?.error || 'sin resultado');
+      } else {
+        console.log('✅ Email de confirmación enviado a:', booking.email);
+      }
     } catch (emailError) {
-      console.error('Error enviando confirmación de reserva:', emailError);
-      // No fallar la petición si el email falla
+      console.error('❌ Excepción enviando confirmación de reserva:', emailError?.message || emailError);
     }
     
     // Crear notificación en la base de datos para el cliente

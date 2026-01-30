@@ -154,6 +154,18 @@ connectDB();
 // Servir archivos estáticos (para la página de bienvenida)
 app.use(express.static('public'));
 
+// Comprobar configuración de email (sin exponer claves)
+app.get('/api/health/email', (req, res) => {
+  try {
+    const emailService = require('./services/emailService');
+    const status = emailService.getEmailStatus && emailService.getEmailStatus();
+    const email = status ? { provider: status.provider, configured: status.configured, from: status.from || undefined, hint: status.hint } : { configured: false, hint: 'No disponible' };
+    return res.json({ ok: true, email });
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 // Ruta principal - Página HTML de bienvenida con estadísticas
 app.get('/', async (req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
@@ -680,7 +692,24 @@ const setupReminderCron = () => {
 app.listen(PORT, async () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   console.log(`✅ Yassline Tour API está lista para recibir peticiones`);
-  
+
+  // Estado del email (Resend o SMTP) para ver en logs de Railway
+  try {
+    const hasResendKey = !!(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim());
+    console.log(`📧 RESEND_API_KEY en este proceso: ${hasResendKey ? 'SÍ (emails vía Resend)' : 'NO (se usará SMTP si está configurado)'}`);
+    const emailService = require('./services/emailService');
+    const emailStatus = emailService.getEmailStatus && emailService.getEmailStatus();
+    if (emailStatus) {
+      console.log(`📧 Email: ${emailStatus.provider} | Configurado: ${emailStatus.configured} | ${emailStatus.hint}`);
+      if (emailStatus.from) console.log(`📧 Remitente: ${emailStatus.from}`);
+      if (!emailStatus.configured) {
+        console.warn('⚠️ Los emails NO se enviarán. En Railway añade RESEND_API_KEY y REDEPLOY (ver backend/EMAIL_RAILWAY_RESEND.md)');
+      }
+    }
+  } catch (e) {
+    console.warn('📧 No se pudo comprobar estado de email:', e.message);
+  }
+
   // Configurar sistema de recordatorios después de conectar a la base de datos
   if (mongoose.connection.readyState === 1) {
     setupReminderCron();

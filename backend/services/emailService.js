@@ -1,6 +1,56 @@
 const nodemailer = require('nodemailer');
 
-// Configuración del transporter de email
+const COMPANY_NAME = process.env.COMPANY_NAME || 'Yassline Tour';
+const COMPANY_EMAIL = process.env.COMPANY_EMAIL || 'info@yassline.com';
+
+/**
+ * Enviar email vía Resend API (HTTPS). Funciona en Railway donde SMTP suele estar bloqueado.
+ * Variables: RESEND_API_KEY (requerido), RESEND_FROM (opcional, ej. "Yassline <onboarding@resend.dev>")
+ */
+const sendEmailViaResend = async ({ to, subject, html, text, attachments = [] }) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || !apiKey.trim()) {
+    throw new Error('RESEND_API_KEY no configurado');
+  }
+  const from = process.env.RESEND_FROM || `"${COMPANY_NAME}" <onboarding@resend.dev>`;
+  const toArray = Array.isArray(to) ? to : [to];
+  const body = {
+    from,
+    to: toArray,
+    subject,
+    html: html || undefined,
+    text: text || undefined,
+  };
+  if (attachments.length > 0) {
+    body.attachments = attachments.map((att) => ({
+      filename: att.filename || 'attachment',
+      content: Buffer.isBuffer(att.content) ? att.content.toString('base64') : att.content,
+    }));
+  }
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const errMsg = data.message || data.error || data.statusText || `HTTP ${res.status}`;
+    console.error('❌ Resend API error:', res.status, JSON.stringify(data));
+    if (res.status === 422 || res.status === 403) {
+      const hint = (data.message || '').toLowerCase().includes('domain')
+        ? ' Usa RESEND_FROM con onboarding@resend.dev o verifica tu dominio en resend.com.'
+        : ' Comprueba RESEND_API_KEY y RESEND_FROM (usa "Nombre <onboarding@resend.dev>" en plan gratis).';
+      throw new Error(errMsg + hint);
+    }
+    throw new Error(errMsg);
+  }
+  return { success: true, messageId: data.id };
+};
+
+// Configuración del transporter de email (SMTP, para desarrollo local)
 const createTransporter = () => {
   // Validar que SMTP_HOST no sea un placeholder
   const smtpHost = process.env.SMTP_HOST;
@@ -48,8 +98,8 @@ const createTransporter = () => {
   const emailPass = process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD;
   
   if (!emailUser || !emailPass) {
-    console.error('❌ ERROR: EMAIL_USER o EMAIL_PASS no están configurados');
-    throw new Error('Configuración de email incompleta. Verifica EMAIL_USER y EMAIL_PASS en .env');
+    console.error('❌ ERROR: EMAIL_USER o EMAIL_PASS no están configurados (y RESEND_API_KEY tampoco).');
+    throw new Error('Email no configurado. Añade RESEND_API_KEY en .env o Railway (recomendado, ver backend/EMAIL_RAILWAY_RESEND.md), o EMAIL_USER y EMAIL_PASS para SMTP.');
   }
   
   console.log('📧 Usando Gmail SMTP con usuario:', emailUser);
@@ -85,24 +135,53 @@ const createTransporter = () => {
 
 // Email de destino para notificaciones administrativas
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@yassline.com';
-const COMPANY_NAME = process.env.COMPANY_NAME || 'Yassline Tour';
-const COMPANY_EMAIL = process.env.COMPANY_EMAIL || 'info@yassline.com';
 const COMPANY_PHONE = process.env.COMPANY_PHONE || '+212 669 215 611';
 
 /**
- * Enviar email genérico
+ * Estado de configuración de email (para logs al arranque).
+ * No expone claves; solo indica si Resend está configurado.
+ */
+const getEmailStatus = () => {
+  const hasResend = !!(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim());
+  const from = process.env.RESEND_FROM || `"${COMPANY_NAME}" <onboarding@resend.dev>`;
+  if (hasResend) {
+    return { provider: 'resend', configured: true, from, hint: 'Emails se enviarán vía Resend API.' };
+  }
+  const hasSmtp = !!(process.env.EMAIL_USER || process.env.GMAIL_USER) && !!(process.env.EMAIL_PASS || process.env.GMAIL_APP_PASSWORD);
+  const hasCustomSmtp = process.env.SMTP_HOST && !process.env.SMTP_HOST.includes('placeholder');
+  return {
+    provider: 'smtp',
+    configured: hasSmtp || hasCustomSmtp,
+    from: null,
+    hint: hasSmtp || hasCustomSmtp
+      ? 'Emails se enviarán vía SMTP (en Railway puede dar ETIMEDOUT).'
+      : '⚠️ Email NO configurado: añade RESEND_API_KEY en Railway (recomendado) o EMAIL_USER/EMAIL_PASS.',
+  };
+};
+
+/**
+ * Enviar email genérico.
+ * Si RESEND_API_KEY está definido, usa Resend (recomendado en Railway).
+ * Si no, usa SMTP (nodemailer).
  */
 const sendEmail = async ({ to, subject, html, text, attachments = [] }) => {
+  const useResend = !!(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.trim());
   try {
-    console.log(`📧 Intentando enviar email a: ${to}`);
-    console.log(`📧 Asunto: ${subject}`);
-    
+    console.log(`📧 Enviando email a: ${to} | Asunto: ${subject} | Provider: ${useResend ? 'Resend' : 'SMTP'}`);
+
+    // Resend (API por HTTPS) — funciona en Railway donde SMTP suele estar bloqueado
+    if (useResend) {
+      const result = await sendEmailViaResend({ to, subject, html, text, attachments });
+      console.log('✅ Email enviado vía Resend:', result.messageId);
+      return result;
+    }
+
+    // SMTP (nodemailer) — para desarrollo local o servidores que permitan SMTP
+    console.log('📧 RESEND_API_KEY no configurada; intentando SMTP (EMAIL_USER/EMAIL_PASS)...');
     const transporter = createTransporter();
-    
-    // Verificar conexión antes de enviar
     await transporter.verify();
     console.log('✅ Conexión SMTP verificada correctamente');
-    
+
     const mailOptions = {
       from: `"${COMPANY_NAME}" <${COMPANY_EMAIL}>`,
       to,
@@ -115,15 +194,12 @@ const sendEmail = async ({ to, subject, html, text, attachments = [] }) => {
     console.log(`📧 Enviando email desde: ${COMPANY_EMAIL} a: ${to}`);
     const info = await transporter.sendMail(mailOptions);
     console.log('✅ Email enviado exitosamente:', info.messageId);
-    console.log('✅ Respuesta del servidor:', info.response);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Error enviando email:', error.message);
-    console.error('❌ Código de error:', error.code);
-    console.error('❌ Comando:', error.command);
-    if (error.response) {
-      console.error('❌ Respuesta del servidor:', error.response);
-    }
+    if (error.code) console.error('❌ Código:', error.code);
+    if (error.response) console.error('❌ Respuesta:', error.response);
+    // Para Resend: el mensaje ya incluye hint (ej. dominio no verificado)
     return { success: false, error: error.message };
   }
 };
@@ -683,87 +759,49 @@ exports.sendBookingReminder = async (bookingData) => {
   });
 };
 
-// Enviar email de recuperación de contraseña
+// Enviar email de recuperación de contraseña (usa sendEmail para Resend o SMTP)
 exports.sendPasswordReset = async ({ nombre, email, resetUrl }) => {
-  try {
-    const transporter = createTransporter();
-    if (!transporter) {
-      console.warn('⚠️ No se puede enviar email de recuperación: servicio de email no configurado');
-      return;
-    }
-
-    const mailOptions = {
-      from: `"${process.env.EMAIL_FROM_NAME || 'Yassline Tour'}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@yassline.com'}>`,
-      to: email,
-      subject: 'Recuperación de Contraseña - Yassline Tour',
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Recuperación de Contraseña</title>
-        </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0;">Yassline Tour</h1>
-          </div>
-          
-          <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
-            <h2 style="color: #333; margin-top: 0;">Recuperación de Contraseña</h2>
-            
-            <p>Hola ${nombre || 'Usuario'},</p>
-            
-            <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Yassline Tour.</p>
-            
-            <p>Si solicitaste este cambio, haz clic en el siguiente botón para restablecer tu contraseña:</p>
-            
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${resetUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
-                Restablecer Contraseña
-              </a>
-            </div>
-            
-            <p style="font-size: 12px; color: #666;">O copia y pega este enlace en tu navegador:</p>
-            <p style="font-size: 12px; color: #666; word-break: break-all;">${resetUrl}</p>
-            
-            <p><strong>Este enlace expirará en 1 hora.</strong></p>
-            
-            <p>Si no solicitaste este cambio, puedes ignorar este email de forma segura. Tu contraseña no será modificada.</p>
-            
-            <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-            
-            <p style="font-size: 12px; color: #666; margin-bottom: 0;">
-              Este es un email automático, por favor no respondas a este mensaje.<br>
-              Si tienes alguna pregunta, contacta a nuestro equipo de soporte.
-            </p>
-          </div>
-        </body>
-        </html>
-      `,
-      text: `
-        Recuperación de Contraseña - Yassline Tour
-        
-        Hola ${nombre || 'Usuario'},
-        
-        Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Yassline Tour.
-        
-        Si solicitaste este cambio, visita el siguiente enlace para restablecer tu contraseña:
-        ${resetUrl}
-        
-        Este enlace expirará en 1 hora.
-        
-        Si no solicitaste este cambio, puedes ignorar este email de forma segura. Tu contraseña no será modificada.
-      `,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email de recuperación de contraseña enviado:', info.messageId);
-    return info;
-  } catch (error) {
-    console.error('❌ Error enviando email de recuperación de contraseña:', error);
-    throw error;
-  }
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Recuperación de Contraseña</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0;">Yassline Tour</h1>
+      </div>
+      <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        <h2 style="color: #333; margin-top: 0;">Recuperación de Contraseña</h2>
+        <p>Hola ${nombre || 'Usuario'},</p>
+        <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Yassline Tour.</p>
+        <p>Si solicitaste este cambio, haz clic en el siguiente botón para restablecer tu contraseña:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Restablecer Contraseña</a>
+        </div>
+        <p style="font-size: 12px; color: #666;">O copia y pega este enlace en tu navegador:</p>
+        <p style="font-size: 12px; color: #666; word-break: break-all;">${resetUrl}</p>
+        <p><strong>Este enlace expirará en 1 hora.</strong></p>
+        <p>Si no solicitaste este cambio, puedes ignorar este email de forma segura. Tu contraseña no será modificada.</p>
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        <p style="font-size: 12px; color: #666; margin-bottom: 0;">Este es un email automático, por favor no respondas a este mensaje.</p>
+      </div>
+    </body>
+    </html>
+  `;
+  const text = `Recuperación de Contraseña - Yassline Tour\n\nHola ${nombre || 'Usuario'},\n\nHemos recibido una solicitud para restablecer la contraseña. Visita: ${resetUrl}\n\nEste enlace expirará en 1 hora. Si no solicitaste este cambio, ignora este email.`;
+  const result = await sendEmail({
+    to: email,
+    subject: 'Recuperación de contraseña - Yassline Tour',
+    html,
+    text,
+  });
+  if (!result.success) throw new Error(result.error);
+  return { messageId: result.messageId };
 };
+
+exports.getEmailStatus = getEmailStatus;
 
 module.exports = exports;
