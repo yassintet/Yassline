@@ -2,6 +2,10 @@ const nodemailer = require('nodemailer');
 
 const COMPANY_NAME = process.env.COMPANY_NAME || 'Yassline Tour';
 const COMPANY_EMAIL = process.env.COMPANY_EMAIL || 'info@yassline.com';
+const COMPANY_TAGLINE = process.env.COMPANY_TAGLINE || 'Transporte y experiencias en Marruecos';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://yassline.com';
+/** URL pública del logo para emails (recomendado: logo dorado/blanco sobre negro). Si no se define, se usa nombre de empresa en texto. */
+const LOGO_URL = (process.env.LOGO_URL && process.env.LOGO_URL.trim()) ? process.env.LOGO_URL.trim() : `${FRONTEND_URL}/logo-email.png`;
 
 /**
  * Enviar email vía Resend API (HTTPS). Funciona en Railway donde SMTP suele estar bloqueado.
@@ -205,7 +209,7 @@ const sendEmail = async ({ to, subject, html, text, attachments = [] }) => {
 };
 
 /**
- * Template HTML base para emails — profesional, elegante y moderno (Yassline)
+ * Template HTML base — estilo del logo: negro, dorado, blanco; profesional y elegante
  */
 const getBaseTemplate = (content, title) => {
   return `
@@ -214,141 +218,200 @@ const getBaseTemplate = (content, title) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
+  <title>${title} · ${COMPANY_NAME}</title>
   <style>
     * { box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.65;
-      color: #374151;
+      font-family: Georgia, 'Times New Roman', serif;
+      line-height: 1.7;
+      color: #2c2c2c;
       margin: 0;
       padding: 0;
-      background-color: #f8fafc;
+      background-color: #e8e6e1;
     }
-    .wrapper {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
+    .wrapper { max-width: 600px; margin: 0 auto; padding: 36px 20px; }
     .container {
-      background: #ffffff;
-      border-radius: 12px;
+      background: #fdfcfb;
+      border-radius: 2px;
       overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+    .brand-bar {
+      height: 4px;
+      background: linear-gradient(90deg, #d4af37 0%, #b8860b 50%, #d4af37 100%);
     }
     .header {
-      padding: 36px 40px 32px;
-      border-bottom: 3px solid #FF385C;
-      text-align: left;
+      padding: 40px 44px 36px;
+      text-align: center;
+      background: #0a0a0a;
     }
-    .header h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 600;
-      color: #111827;
-      letter-spacing: -0.025em;
+    .header .logo-img {
+      display: block;
+      max-width: 240px;
+      width: 100%;
+      height: auto;
+      margin: 0 auto;
     }
-    .header .subtitle {
-      margin: 8px 0 0 0;
-      font-size: 13px;
-      color: #6b7280;
-      font-weight: 400;
+    .header .tagline {
+      margin: 20px 0 0 0;
+      font-size: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #d4af37;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .header .page-title {
+      margin: 16px 0 0 0;
+      font-size: 11px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #6b6b6b;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
     }
     .content {
-      padding: 36px 40px 40px;
+      padding: 40px 44px 44px;
       font-size: 15px;
+      font-family: Georgia, 'Times New Roman', serif;
     }
     .content h2 {
       margin: 0 0 20px 0;
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 600;
-      color: #111827;
-      letter-spacing: -0.02em;
-    }
-    .content p {
-      margin: 0 0 14px 0;
-      color: #4b5563;
-      line-height: 1.7;
-    }
-    .content p:last-of-type { margin-bottom: 0; }
-    .content ul {
-      margin: 14px 0;
-      padding-left: 22px;
-      color: #4b5563;
-      line-height: 1.7;
-    }
-    .footer {
-      padding: 24px 40px 28px;
-      background: #fafafa;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 11px;
+      color: #1a1a1a;
       letter-spacing: 0.02em;
     }
-    .footer p { margin: 0; }
-    .footer a { color: #6b7280; text-decoration: none; }
+    .content p { margin: 0 0 16px 0; color: #3d3d3d; line-height: 1.75; }
+    .content ul { margin: 16px 0; padding-left: 24px; color: #3d3d3d; line-height: 1.75; }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #d4af37, transparent);
+      margin: 28px 0;
+    }
+    .details-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 28px 0;
+      border: 1px solid #e5e2dc;
+    }
+    .details-table th {
+      background: #1a1a1a;
+      color: #d4af37;
+      font-size: 11px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 16px 24px;
+      text-align: left;
+    }
+    .details-table td {
+      padding: 16px 24px;
+      border-bottom: 1px solid #ebe8e2;
+      color: #2c2c2c;
+    }
+    .details-table tr:last-child td { border-bottom: none; }
+    .details-table tr:nth-child(even) td { background: #faf9f7; }
+    .details-table .label { color: #6b6b6b; font-weight: 600; width: 38%; }
+    .cta-block { margin: 32px 0; text-align: center; }
     .button {
       display: inline-block;
-      padding: 14px 28px;
-      background-color: #FF385C;
-      color: #ffffff !important;
+      padding: 16px 36px;
+      background: #1a1a1a;
+      color: #d4af37 !important;
       text-decoration: none;
-      border-radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-weight: 600;
-      font-size: 14px;
-      margin: 20px 0 0 0;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 0 8px 12px 8px;
+      border: 2px solid #1a1a1a;
     }
+    .button-secondary {
+      display: inline-block;
+      padding: 14px 28px;
+      background: transparent;
+      color: #1a1a1a !important;
+      text-decoration: none;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      border: 2px solid #d4af37;
+      margin: 0 8px 12px 8px;
+    }
+    .signature {
+      margin-top: 36px;
+      padding-top: 28px;
+      border-top: 1px solid #e5e2dc;
+    }
+    .signature .thanks { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+    .signature .team { color: #6b6b6b; font-size: 14px; }
+    .footer {
+      padding: 28px 44px 32px;
+      background: #0a0a0a;
+      text-align: center;
+      color: #8c8c8c;
+      font-size: 11px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      letter-spacing: 0.04em;
+    }
+    .footer p { margin: 0; }
+    .footer a { color: #d4af37; text-decoration: none; }
+    .footer .contact { margin-top: 10px; color: #a3a3a3; }
     .info-box {
-      background: #fafafa;
-      border-left: 4px solid #FF385C;
-      border-radius: 0 8px 8px 0;
-      padding: 20px 24px;
-      margin: 24px 0;
+      background: #faf9f7;
+      border-left: 4px solid #d4af37;
+      padding: 22px 28px;
+      margin: 28px 0;
+      border: 1px solid #e5e2dc;
     }
-    .info-box p { margin: 0 0 10px 0; color: #374151; line-height: 1.65; }
+    .info-box p { margin: 0 0 10px 0; color: #2c2c2c; line-height: 1.7; }
     .info-box p:last-child { margin-bottom: 0; }
-    .info-box strong { color: #111827; font-weight: 600; }
     .detail-row {
-      padding: 14px 0;
-      border-bottom: 1px solid #f3f4f6;
+      padding: 16px 0;
+      border-bottom: 1px solid #ebe8e2;
       margin: 0;
     }
     .detail-row:last-child { border-bottom: none; }
     .detail-label {
       font-weight: 600;
-      color: #6b7280;
-      font-size: 12px;
+      color: #6b6b6b;
+      font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.08em;
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
-    .detail-row span:not(.detail-label) { color: #111827; font-size: 15px; }
-    .detail-row div { margin-top: 8px; color: #374151; white-space: pre-wrap; line-height: 1.6; }
+    .detail-row span:not(.detail-label) { color: #1a1a1a; font-size: 15px; }
+    .detail-row div { margin-top: 8px; color: #3d3d3d; white-space: pre-wrap; line-height: 1.65; }
     .highlight {
-      background: #fafafa;
-      border-left: 4px solid #FF385C;
-      border-radius: 0 8px 8px 0;
-      padding: 20px 24px;
-      margin: 24px 0;
+      background: #faf9f7;
+      border-left: 4px solid #d4af37;
+      padding: 22px 28px;
+      margin: 28px 0;
+      border: 1px solid #e5e2dc;
     }
-    .highlight p { margin: 0 0 8px 0; color: #374151; }
+    .highlight p { margin: 0 0 8px 0; color: #2c2c2c; }
     .highlight p:last-child { margin-bottom: 0; }
-    .divider { height: 1px; background: #f3f4f6; margin: 28px 0; }
   </style>
 </head>
 <body>
   <div class="wrapper">
     <div class="container">
+      <div class="brand-bar"></div>
       <div class="header">
-        <h1>${COMPANY_NAME}</h1>
-        <p class="subtitle">${title}</p>
+        <img src="${LOGO_URL}" alt="${COMPANY_NAME}" width="240" height="auto" class="logo-img" style="display:block;max-width:240px;height:auto;margin:0 auto;border:0;" />
+        <p class="tagline">${COMPANY_TAGLINE}</p>
+        <p class="page-title">${title}</p>
       </div>
       <div class="content">
         ${content}
       </div>
       <div class="footer">
-        <p>© ${new Date().getFullYear()} ${COMPANY_NAME} · ${COMPANY_EMAIL}</p>
+        <p>© ${new Date().getFullYear()} ${COMPANY_NAME}</p>
+        <p class="contact"><a href="mailto:${COMPANY_EMAIL}">${COMPANY_EMAIL}</a> · ${COMPANY_PHONE}</p>
       </div>
     </div>
   </div>
@@ -410,9 +473,8 @@ exports.sendContactNotification = async (contactData) => {
  */
 exports.sendContactConfirmation = async (contactData) => {
   const content = `
-    <h2>¡Gracias por contactarnos!</h2>
-    <p>Hola <strong>${contactData.name}</strong>,</p>
-    <p>Hemos recibido tu mensaje y nos pondremos en contacto contigo lo antes posible.</p>
+    <h2>¡Hola, ${contactData.name}!</h2>
+    <p>Gracias por contactar con <strong>${COMPANY_NAME}</strong>. Hemos recibido tu mensaje y nos pondremos en contacto contigo lo antes posible.</p>
     
     <div class="info-box">
       <p><strong>Resumen de tu consulta:</strong></p>
@@ -421,13 +483,15 @@ exports.sendContactConfirmation = async (contactData) => {
     
     <p>Nuestro equipo revisará tu solicitud y te responderá en un plazo máximo de 24 horas.</p>
     
-    <p>Si tienes alguna pregunta urgente, puedes contactarnos directamente:</p>
-    <ul>
-      <li>Email: ${COMPANY_EMAIL}</li>
-      <li>Teléfono: ${COMPANY_PHONE}</li>
-    </ul>
+    <div class="cta-block">
+      <a href="mailto:${COMPANY_EMAIL}" class="button">Responder por email</a>
+      <a href="${FRONTEND_URL}/contacto" class="button-secondary">Ver formulario de contacto</a>
+    </div>
     
-    <p>Saludos cordiales,<br>El equipo de ${COMPANY_NAME}</p>
+    <div class="signature">
+      <p class="thanks">Gracias por elegir Yassline Tour</p>
+      <p class="team">El equipo de ${COMPANY_NAME}</p>
+    </div>
   `;
 
   return await sendEmail({
@@ -442,71 +506,31 @@ exports.sendContactConfirmation = async (contactData) => {
  * Notificación de nueva solicitud de reserva (para admin)
  */
 exports.sendBookingNotification = async (bookingData) => {
+  const adminUrl = `${FRONTEND_URL}/admin`;
   const content = `
-    <h2>Nueva Solicitud de Reserva</h2>
-    <div class="info-box">
-      <p><strong>Has recibido una nueva solicitud de reserva.</strong></p>
-    </div>
+    <h2>Nueva solicitud de reserva</h2>
+    <p>Has recibido una nueva solicitud de reserva de <strong>${bookingData.nombre}</strong>.</p>
     
-    <div class="detail-row">
-      <span class="detail-label">Cliente:</span>
-      <span>${bookingData.nombre}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Email:</span>
-      <span>${bookingData.email}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Teléfono:</span>
-      <span>${bookingData.telefono || 'No proporcionado'}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Servicio:</span>
-      <span>${bookingData.serviceName || 'N/A'}</span>
-    </div>
-    <div class="detail-row">
-      <span class="detail-label">Tipo:</span>
-      <span>${bookingData.serviceType || 'N/A'}</span>
-    </div>
-    ${bookingData.priceLabel ? `
-    <div class="detail-row">
-      <span class="detail-label">Precio:</span>
-      <span>${bookingData.priceLabel}</span>
-    </div>
-    ` : ''}
-    ${bookingData.fecha ? `
-    <div class="detail-row">
-      <span class="detail-label">Fecha:</span>
-      <span>${bookingData.fecha}</span>
-    </div>
-    ` : ''}
-    ${bookingData.hora ? `
-    <div class="detail-row">
-      <span class="detail-label">Hora:</span>
-      <span>${bookingData.hora}</span>
-    </div>
-    ` : ''}
-    ${bookingData.pasajeros ? `
-    <div class="detail-row">
-      <span class="detail-label">Pasajeros:</span>
-      <span>${bookingData.pasajeros}</span>
-    </div>
-    ` : ''}
-    ${bookingData.mensaje ? `
-    <div class="detail-row">
-      <span class="detail-label">Mensaje:</span>
-      <div style="margin-top: 10px; white-space: pre-wrap;">${bookingData.mensaje}</div>
-    </div>
-    ` : ''}
-    ${bookingData.details ? `
-    <div class="detail-row">
-      <span class="detail-label">Detalles adicionales:</span>
-      <div style="margin-top: 10px; white-space: pre-wrap;">${bookingData.details}</div>
-    </div>
-    ` : ''}
-    <div class="detail-row">
-      <span class="detail-label">Fecha de solicitud:</span>
-      <span>${new Date().toLocaleString('es-ES')}</span>
+    <table class="details-table">
+      <thead><tr><th colspan="2">Datos de la solicitud</th></tr></thead>
+      <tbody>
+        <tr><td class="label">Cliente</td><td>${bookingData.nombre}</td></tr>
+        <tr><td class="label">Email</td><td><a href="mailto:${bookingData.email}">${bookingData.email}</a></td></tr>
+        <tr><td class="label">Teléfono</td><td>${bookingData.telefono || '—'}</td></tr>
+        <tr><td class="label">Servicio</td><td>${bookingData.serviceName || '—'}</td></tr>
+        <tr><td class="label">Tipo</td><td>${bookingData.serviceType || '—'}</td></tr>
+        ${bookingData.priceLabel ? `<tr><td class="label">Precio</td><td>${bookingData.priceLabel}</td></tr>` : ''}
+        ${bookingData.fecha ? `<tr><td class="label">Fecha</td><td>${bookingData.fecha}</td></tr>` : ''}
+        ${bookingData.hora ? `<tr><td class="label">Hora</td><td>${bookingData.hora}</td></tr>` : ''}
+        ${bookingData.pasajeros ? `<tr><td class="label">Pasajeros</td><td>${bookingData.pasajeros}</td></tr>` : ''}
+        <tr><td class="label">Fecha de solicitud</td><td>${new Date().toLocaleString('es-ES')}</td></tr>
+      </tbody>
+    </table>
+    ${bookingData.mensaje ? `<div class="info-box"><p><strong>Mensaje:</strong></p><p>${bookingData.mensaje}</p></div>` : ''}
+    ${bookingData.details ? `<div class="highlight"><p><strong>Detalles adicionales:</strong></p><p style="white-space: pre-wrap;">${bookingData.details}</p></div>` : ''}
+    
+    <div class="cta-block">
+      <a href="${adminUrl}" class="button">Ir al panel de administración</a>
     </div>
   `;
 
@@ -522,30 +546,34 @@ exports.sendBookingNotification = async (bookingData) => {
  * Confirmación de recepción de reserva al cliente
  */
 exports.sendBookingConfirmation = async (bookingData) => {
+  const bookingUrl = `${FRONTEND_URL}/mis-reservas`;
   const content = `
-    <h2>¡Solicitud de Reserva Recibida!</h2>
-    <p>Hola <strong>${bookingData.nombre}</strong>,</p>
-    <p>Gracias por tu interés en nuestros servicios. Hemos recibido tu solicitud de reserva y la estamos procesando.</p>
+    <h2>¡Hola, ${bookingData.nombre}!</h2>
+    <p>Gracias por confiar en <strong>${COMPANY_NAME}</strong>. Hemos recibido tu solicitud de reserva y la estamos procesando con atención.</p>
     
-    <div class="info-box">
-      <p><strong>Detalles de tu solicitud:</strong></p>
-      <p><strong>Servicio:</strong> ${bookingData.serviceName || 'N/A'}</p>
-      <p><strong>Tipo:</strong> ${bookingData.serviceType || 'N/A'}</p>
-      ${bookingData.priceLabel ? `<p><strong>Precio estimado:</strong> ${bookingData.priceLabel}</p>` : ''}
-      ${bookingData.fecha ? `<p><strong>Fecha:</strong> ${bookingData.fecha}</p>` : ''}
-      ${bookingData.hora ? `<p><strong>Hora:</strong> ${bookingData.hora}</p>` : ''}
-      ${bookingData.pasajeros ? `<p><strong>Pasajeros:</strong> ${bookingData.pasajeros}</p>` : ''}
-    </div>
+    <table class="details-table">
+      <thead><tr><th colspan="2">Detalles de tu solicitud</th></tr></thead>
+      <tbody>
+        <tr><td class="label">Servicio</td><td>${bookingData.serviceName || '—'}</td></tr>
+        <tr><td class="label">Tipo</td><td>${bookingData.serviceType || '—'}</td></tr>
+        ${bookingData.priceLabel ? `<tr><td class="label">Precio estimado</td><td>${bookingData.priceLabel}</td></tr>` : ''}
+        ${bookingData.fecha ? `<tr><td class="label">Fecha</td><td>${bookingData.fecha}</td></tr>` : ''}
+        ${bookingData.hora ? `<tr><td class="label">Hora</td><td>${bookingData.hora}</td></tr>` : ''}
+        ${bookingData.pasajeros ? `<tr><td class="label">Pasajeros</td><td>${bookingData.pasajeros}</td></tr>` : ''}
+      </tbody>
+    </table>
     
     <p>Nuestro equipo revisará tu solicitud y te contactará en breve para confirmar los detalles y finalizar la reserva.</p>
     
-    <p>Si tienes alguna pregunta o necesitas modificar algo, no dudes en contactarnos:</p>
-    <ul>
-      <li>Email: ${COMPANY_EMAIL}</li>
-      <li>Teléfono: ${COMPANY_PHONE}</li>
-    </ul>
+    <div class="cta-block">
+      <a href="${bookingUrl}" class="button">Ver mis reservas</a>
+      <a href="mailto:${COMPANY_EMAIL}" class="button-secondary">Contactar</a>
+    </div>
     
-    <p>Saludos cordiales,<br>El equipo de ${COMPANY_NAME}</p>
+    <div class="signature">
+      <p class="thanks">Gracias por elegir Yassline Tour</p>
+      <p class="team">El equipo de ${COMPANY_NAME}</p>
+    </div>
   `;
 
   return await sendEmail({
@@ -569,32 +597,36 @@ exports.sendReservationConfirmed = async (reservationData, invoiceBuffer) => {
     });
   }
 
+  const reservationUrl = reservationData.bookingId
+    ? `${FRONTEND_URL}/reservas/${reservationData.bookingId}`
+    : `${FRONTEND_URL}/mis-reservas`;
+  const totalFormatted = reservationData.total != null ? (typeof reservationData.total === 'number' ? `${reservationData.total.toLocaleString()} MAD` : reservationData.total) : '—';
   const content = `
-    <h2>¡Reserva Confirmada!</h2>
-    <p>Hola <strong>${reservationData.nombre}</strong>,</p>
-    <p>Nos complace confirmar que tu reserva ha sido confirmada.</p>
+    <h2>¡${reservationData.nombre}, tu reserva está confirmada!</h2>
+    <p>Nos complace confirmarte que tu reserva ha sido confirmada. Aquí tienes el resumen:</p>
     
-    <div class="info-box">
-      <p><strong>Detalles de tu reserva:</strong></p>
-      <p><strong>Número de reserva:</strong> ${reservationData.reservationNumber || 'N/A'}</p>
-      <p><strong>Servicio:</strong> ${reservationData.serviceName || 'N/A'}</p>
-      <p><strong>Fecha:</strong> ${reservationData.fecha || 'N/A'}</p>
-      <p><strong>Hora:</strong> ${reservationData.hora || 'N/A'}</p>
-      <p><strong>Total:</strong> ${reservationData.total || 'N/A'}</p>
+    <table class="details-table">
+      <thead><tr><th colspan="2">Detalles de tu reserva</th></tr></thead>
+      <tbody>
+        <tr><td class="label">Número de reserva</td><td>${reservationData.reservationNumber || '—'}</td></tr>
+        <tr><td class="label">Servicio</td><td>${reservationData.serviceName || '—'}</td></tr>
+        <tr><td class="label">Fecha</td><td>${reservationData.fecha || '—'}</td></tr>
+        <tr><td class="label">Hora</td><td>${reservationData.hora || '—'}</td></tr>
+        <tr><td class="label">Total</td><td><strong>${totalFormatted}</strong></td></tr>
+      </tbody>
+    </table>
+    
+    ${invoiceBuffer ? `<p>Adjuntamos tu factura en PDF. Guárdala para tus registros.</p>` : ''}
+    
+    <div class="cta-block">
+      <a href="${reservationUrl}" class="button">Ver mi reserva</a>
+      <a href="mailto:${COMPANY_EMAIL}" class="button-secondary">Contactar</a>
     </div>
     
-    ${invoiceBuffer ? `
-    <p>Adjuntamos tu factura en formato PDF. Por favor, guárdala para tus registros.</p>
-    ` : ''}
-    
-    <p>Si tienes alguna pregunta o necesitas modificar tu reserva, contacta con nosotros:</p>
-    <ul>
-      <li>Email: ${COMPANY_EMAIL}</li>
-      <li>Teléfono: ${COMPANY_PHONE}</li>
-    </ul>
-    
-    <p>¡Esperamos verte pronto!</p>
-    <p>Saludos cordiales,<br>El equipo de ${COMPANY_NAME}</p>
+    <div class="signature">
+      <p class="thanks">¡Esperamos verte pronto!</p>
+      <p class="team">El equipo de ${COMPANY_NAME}</p>
+    </div>
   `;
 
   return await sendEmail({

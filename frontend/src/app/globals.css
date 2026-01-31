@@ -1,21 +1,38 @@
 @import "tailwindcss";
 
+/* Yassline brand: negro, dorado, crema — estilo premium */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf8f5;
+  --foreground: #0f0f0f;
+  --yass-black: #0f0f0f;
+  --yass-black-soft: #1a1a1a;
+  --yass-gold: #b8860b;
+  --yass-gold-light: #d4af37;
+  --yass-gold-pale: #e8d48b;
+  --yass-cream: #faf8f5;
+  --yass-cream-dark: #f0ebe3;
+  --yass-muted: #6b635b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-yass-black: var(--yass-black);
+  --color-yass-black-soft: var(--yass-black-soft);
+  --color-yass-gold: var(--yass-gold);
+  --color-yass-gold-light: var(--yass-gold-light);
+  --color-yass-gold-pale: var(--yass-gold-pale);
+  --color-yass-cream: var(--yass-cream);
+  --color-yass-cream-dark: var(--yass-cream-dark);
+  --color-yass-muted: var(--yass-muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0f0f0f;
+    --foreground: #faf8f5;
   }
 }
 
@@ -45,6 +62,17 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -98,16 +126,16 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--yass-cream-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--yass-gold);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--yass-gold-light);
 }
 
 /* Estilos mejorados para selects - mejor contraste y legibilidad */
@@ -138,6 +166,42 @@ select option:checked {
 
 /* Mejorar el estilo del select cuando está abierto */
 select:focus {
-  border-color: #FF385C !important;
-  box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.1) !important;
+  border-color: var(--yass-gold) !important;
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.15) !important;
+}
+
+/* Inputs y textareas: texto y placeholder siempre visibles, diseño coherente */
+input,
+textarea {
+  color: #111827 !important;
+  background-color: #ffffff !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important;
+  opacity: 1;
+}
+
+/* Evitar que autofill ponga texto blanco sobre fondo blanco */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #111827 !important;
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Inputs con fondo gris claro mantienen texto legible */
+input.bg-gray-50,
+textarea.bg-gray-50 {
+  background-color: #f9fafb !important;
+  color: #111827 !important;
+}
+
+input.bg-gray-50:-webkit-autofill,
+input.bg-gray-50:-webkit-autofill:hover,
+input.bg-gray-50:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #f9fafb inset !important;
 }

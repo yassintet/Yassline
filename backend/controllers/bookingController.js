@@ -432,6 +432,7 @@ exports.confirmBooking = async (req, res) => {
       const emailResult = await emailService.sendReservationConfirmed({
         nombre: booking.nombre,
         email: booking.email,
+        bookingId: booking._id?.toString?.() || booking._id,
         reservationNumber: booking.reservationNumber,
         serviceName: booking.serviceName,
         fecha: booking.fecha,

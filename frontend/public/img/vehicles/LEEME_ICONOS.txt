@@ -1,0 +1,25 @@
+ICONOS DE TIPO DE VEHÍCULO (opcional)
+=====================================
+
+Ahora el desplegable "Tipo de Vehículo" usa iconos de Lucide (Van, Bus, Car, etc.)
+para que cada opción se vea distinta.
+
+Si quieres usar TUS PROPIOS iconos realistas (como en tu captura: van en negro,
+minibús en negro, sedán en negro), tienes que:
+
+1. Conseguir o diseñar los iconos
+   - En Figma, Illustrator, o bancos de iconos (Flaticon, SVG Repo, etc.)
+   - Busca "car side view black silhouette", "van icon black", "minibus icon black"
+   - Formato: SVG o PNG, fondo transparente, color negro
+
+2. Guardarlos aquí con estos nombres:
+   - van.svg (o van.png)      → para V-Class y Vito
+   - minibus.svg (o .png)     → para Sprinter
+   - sedan.svg (o .png)       → para Otros
+   - all.svg (o .png)         → para "Todos los Vehículos"
+
+3. Avisar cuando los tengas y te digo cómo conectar el código para que los use
+   en lugar de los iconos Lucide.
+
+Mientras tanto, los iconos Lucide (Van, Bus, Car, cuadrícula) ya son distintos
+entre sí en el desplegable.

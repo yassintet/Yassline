@@ -33,7 +33,9 @@ En tu proyecto de Railway → **Variables** (o **Settings → Variables**), aña
 |-------------------|-----------------------------------------------------------------------|
 | `RESEND_API_KEY` | La clave que copiaste (ej. `re_xxxxxxxxxxxxxxxxxxxxxxxx`)             |
 | `RESEND_FROM`    | Opcional. Por defecto: `Yassline Tour <onboarding@resend.dev>`        |
+| `LOGO_URL`       | Opcional. URL pública del logo para el encabezado del email (fondo oscuro). Por defecto: `FRONTEND_URL/logo-email.png` |
 
+- **Logo en emails:** Sube tu logo (blanco/dorado para fondo oscuro) a tu sitio, por ejemplo en `frontend/public/logo-email.png`. Así quedará en `https://yassline.com/logo-email.png`. Si usas otra ruta, define `LOGO_URL` en Railway con la URL completa.
 - Si **no** pones `RESEND_FROM`, los emails saldrán de `onboarding@resend.dev` (válido en plan gratis).
 - Si **verificas tu dominio** (yassline.com) en Resend, puedes usar:  
   `RESEND_FROM=Yassline Tour <info@yassline.com>`
