@@ -162,7 +162,7 @@ export default function BookingDetail() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#FF385C]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--yass-gold)]" />
       </div>
     );
   }
@@ -173,7 +173,7 @@ export default function BookingDetail() {
         <div className="text-center">
           <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <p className="text-gray-600">{error}</p>
-          <Link href="/admin" className="mt-4 text-[#FF385C] hover:underline">
+          <Link href="/admin" className="mt-4 text-[var(--yass-gold)] hover:underline">
             Volver al panel
           </Link>
         </div>
@@ -223,7 +223,7 @@ export default function BookingDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-[var(--yass-cream)]">
       {/* Header Moderno con Gradientes */}
       <header className="bg-gradient-to-r from-white via-gray-50 to-white shadow-xl border-b-2 border-gray-200 sticky top-0 z-10 backdrop-blur-sm bg-white/95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -231,12 +231,12 @@ export default function BookingDetail() {
             <div className="flex items-center gap-4">
               <Link
                 href="/admin"
-                className="p-2.5 text-gray-600 hover:text-[#FF385C] hover:bg-gradient-to-br hover:from-[#FF385C]/10 hover:to-[#E01E4F]/10 rounded-xl transition-all duration-300 transform hover:scale-110"
+                className="p-2.5 text-gray-600 hover:text-[var(--yass-gold)] hover:bg-gradient-to-br hover:from-[var(--yass-gold)]/10 hover:to-[var(--yass-gold-light)]/10 rounded-xl transition-all duration-300 transform hover:scale-110"
               >
                 <ArrowLeft className="h-6 w-6" />
               </Link>
               <div>
-                <h1 className="text-3xl font-extrabold bg-gradient-to-r from-gray-900 via-[#FF385C] to-gray-700 bg-clip-text text-transparent animate-gradient">
+                <h1 className="text-3xl font-extrabold bg-gradient-to-r from-gray-900 via-[var(--yass-gold)] to-gray-700 bg-clip-text text-transparent animate-gradient">
                   Detalles de Reserva
                 </h1>
                 <p className="text-sm text-gray-500 font-mono mt-1 bg-gray-100 px-2 py-1 rounded-md inline-block">ID: {booking._id}</p>
@@ -292,9 +292,9 @@ export default function BookingDetail() {
           {/* Información Principal */}
           <div className="lg:col-span-2 space-y-6">
             {/* Información del Cliente - Tarjeta con Sombras y Hover */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl hover:shadow-[#FF385C]/10 transition-all duration-500 transform hover:-translate-y-1">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl hover:shadow-[var(--yass-gold)]/10 transition-all duration-500 transform hover:-translate-y-1">
               <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-3">
-                <div className="bg-gradient-to-br from-[#FF385C] via-[#E01E4F] to-[#FF385C] p-2 rounded-xl shadow-lg shadow-[#FF385C]/30">
+                <div className="bg-gradient-to-br from-[var(--yass-gold)] via-[var(--yass-gold-light)] to-[var(--yass-gold)] p-2 rounded-xl shadow-lg shadow-[var(--yass-gold)]/30">
                   <Users className="h-6 w-6 text-white" />
                 </div>
                 <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -341,9 +341,9 @@ export default function BookingDetail() {
             </div>
 
             {/* Detalles del Servicio - Tarjeta con Sombras y Hover */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl hover:shadow-[#FF385C]/10 transition-all duration-500 transform hover:-translate-y-1">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl hover:shadow-[var(--yass-gold)]/10 transition-all duration-500 transform hover:-translate-y-1">
               <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-3">
-                <div className="bg-gradient-to-br from-[#FF385C] via-[#E01E4F] to-[#FF385C] p-2 rounded-xl shadow-lg shadow-[#FF385C]/30">
+                <div className="bg-gradient-to-br from-[var(--yass-gold)] via-[var(--yass-gold-light)] to-[var(--yass-gold)] p-2 rounded-xl shadow-lg shadow-[var(--yass-gold)]/30">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
                 <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -362,7 +362,7 @@ export default function BookingDetail() {
                 {booking.fecha && (
                   <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-xl border border-gray-200">
                     <div className="flex items-center gap-3 mb-2">
-                      <Calendar className="h-5 w-5 text-[#FF385C]" />
+                      <Calendar className="h-5 w-5 text-[var(--yass-gold)]" />
                       <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Fecha</p>
                     </div>
                     <p className="text-lg font-bold text-gray-900 ml-8">{booking.fecha}</p>
@@ -371,7 +371,7 @@ export default function BookingDetail() {
                 {booking.hora && (
                   <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-xl border border-gray-200">
                     <div className="flex items-center gap-3 mb-2">
-                      <Clock className="h-5 w-5 text-[#FF385C]" />
+                      <Clock className="h-5 w-5 text-[var(--yass-gold)]" />
                       <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Hora</p>
                     </div>
                     <p className="text-lg font-bold text-gray-900 ml-8">{booking.hora}</p>
@@ -380,19 +380,19 @@ export default function BookingDetail() {
                 {booking.pasajeros && (
                   <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-xl border border-gray-200">
                     <div className="flex items-center gap-3 mb-2">
-                      <Users className="h-5 w-5 text-[#FF385C]" />
+                      <Users className="h-5 w-5 text-[var(--yass-gold)]" />
                       <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Número de Pasajeros</p>
                     </div>
                     <p className="text-lg font-bold text-gray-900 ml-8">{booking.pasajeros}</p>
                   </div>
                 )}
                 {booking.priceLabel && (
-                  <div className="bg-gradient-to-br from-[#FF385C]/10 to-[#E01E4F]/10 p-5 rounded-xl border-2 border-[#FF385C]/30">
+                  <div className="bg-gradient-to-br from-[var(--yass-gold)]/10 to-[var(--yass-gold-light)]/10 p-5 rounded-xl border-2 border-[var(--yass-gold)]/30">
                     <div className="flex items-center gap-3 mb-2">
-                      <DollarSign className="h-5 w-5 text-[#FF385C]" />
+                      <DollarSign className="h-5 w-5 text-[var(--yass-gold)]" />
                       <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Precio Estimado</p>
                     </div>
-                    <p className="text-lg font-bold text-[#FF385C] ml-8">{booking.priceLabel}</p>
+                    <p className="text-lg font-bold text-[var(--yass-gold)] ml-8">{booking.priceLabel}</p>
                   </div>
                 )}
                 {booking.calculatedPrice && !booking.proposedPrice && (
@@ -407,14 +407,14 @@ export default function BookingDetail() {
               </div>
               
               {/* Sección de Precio Destacada con Fondo de Gradiente */}
-              <div className="border-t-2 border-gradient-to-r from-[#FF385C] to-[#E01E4F] pt-8 mt-8 bg-gradient-to-br from-[#FF385C]/10 via-[#E01E4F]/8 to-[#FF385C]/10 rounded-2xl p-6 shadow-lg shadow-[#FF385C]/10 backdrop-blur-sm">
+              <div className="border-t-2 border-gradient-to-r from-[var(--yass-gold)] to-[var(--yass-gold-light)] pt-8 mt-8 bg-gradient-to-br from-[var(--yass-gold)]/10 via-[var(--yass-gold-light)]/8 to-[var(--yass-gold)]/10 rounded-2xl p-6 shadow-lg shadow-[var(--yass-gold)]/10 backdrop-blur-sm">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                   <div className="flex-1">
                     <h3 className="text-2xl font-extrabold text-gray-900 flex items-center gap-3 mb-2">
-                      <div className="bg-gradient-to-br from-[#FF385C] via-[#E01E4F] to-[#FF385C] p-2 rounded-xl shadow-lg shadow-[#FF385C]/40 animate-pulse-slow">
+                      <div className="bg-gradient-to-br from-[var(--yass-gold)] via-[var(--yass-gold-light)] to-[var(--yass-gold)] p-2 rounded-xl shadow-lg shadow-[var(--yass-gold)]/40 animate-pulse-slow">
                         <DollarSign className="h-6 w-6 text-white" />
                       </div>
-                      <span className="bg-gradient-to-r from-[#FF385C] to-[#E01E4F] bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-r from-[var(--yass-gold)] to-[var(--yass-gold-light)] bg-clip-text text-transparent">
                         Gestión de Precio
                       </span>
                     </h3>
@@ -423,7 +423,7 @@ export default function BookingDetail() {
                   {!isEditingPrice && booking.status === 'pending' && (
                     <button
                       onClick={() => setIsEditingPrice(true)}
-                      className="flex items-center gap-2 bg-gradient-to-r from-[#FF385C] to-[#E01E4F] text-white px-6 py-3 rounded-xl font-bold hover:shadow-xl hover:shadow-[#FF385C]/40 transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
+                      className="flex items-center gap-2 bg-gradient-to-r from-[var(--yass-gold)] to-[var(--yass-gold-light)] text-white px-6 py-3 rounded-xl font-bold hover:shadow-xl hover:shadow-[var(--yass-gold)]/40 transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
                     >
                       <Edit2 className="h-5 w-5" />
                       {booking.proposedPrice ? 'Modificar Precio' : 'Establecer Precio'}
@@ -441,7 +441,7 @@ export default function BookingDetail() {
                 </div>
                 
                 {isEditingPrice ? (
-                  <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border-2 border-[#FF385C]/20 space-y-4">
+                  <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border-2 border-[var(--yass-gold)]/20 space-y-4">
                     <div className="flex items-center gap-3">
                       <div className="flex-1">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -453,7 +453,7 @@ export default function BookingDetail() {
                             value={proposedPrice}
                             onChange={(e) => setProposedPrice(e.target.value)}
                             placeholder="Ej: 500.00"
-                            className="w-full px-5 py-3 text-lg border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#FF385C] focus:border-[#FF385C] outline-none transition-all font-semibold"
+                            className="w-full px-5 py-3 text-lg border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--yass-gold)] focus:border-[var(--yass-gold)] outline-none transition-all font-semibold"
                             min="0"
                             step="0.01"
                             disabled={savingPrice}
@@ -466,7 +466,7 @@ export default function BookingDetail() {
                       <button
                         onClick={handleSetPrice}
                         disabled={savingPrice}
-                        className="flex items-center gap-2 bg-gradient-to-r from-[#FF385C] to-[#E01E4F] text-white px-6 py-3 rounded-xl font-bold hover:shadow-xl hover:shadow-[#FF385C]/40 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        className="flex items-center gap-2 bg-gradient-to-r from-[var(--yass-gold)] to-[var(--yass-gold-light)] text-white px-6 py-3 rounded-xl font-bold hover:shadow-xl hover:shadow-[var(--yass-gold)]/40 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                       >
                         {savingPrice ? (
                           <>
@@ -496,15 +496,15 @@ export default function BookingDetail() {
                 ) : (
                   <div className="space-y-4">
                     {booking.proposedPrice ? (
-                      <div className="bg-gradient-to-br from-[#FF385C]/10 to-[#E01E4F]/10 p-6 rounded-2xl border-2 border-[#FF385C]/30">
+                      <div className="bg-gradient-to-br from-[var(--yass-gold)]/10 to-[var(--yass-gold-light)]/10 p-6 rounded-2xl border-2 border-[var(--yass-gold)]/30">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <div className="bg-[#FF385C] p-3 rounded-xl">
+                            <div className="bg-[var(--yass-gold)] p-3 rounded-xl">
                               <DollarSign className="h-6 w-6 text-white" />
                             </div>
                             <div>
                               <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Precio Propuesto</p>
-                              <p className="text-3xl font-extrabold bg-gradient-to-r from-[#FF385C] to-[#E01E4F] bg-clip-text text-transparent mt-1">
+                              <p className="text-3xl font-extrabold bg-gradient-to-r from-[var(--yass-gold)] to-[var(--yass-gold-light)] bg-clip-text text-transparent mt-1">
                                 {booking.proposedPrice.toLocaleString('es-ES')} MAD
                               </p>
                             </div>
@@ -535,7 +535,7 @@ export default function BookingDetail() {
                         </div>
                         <p className="text-gray-700 font-bold text-lg mb-2">No se ha establecido un precio propuesto aún.</p>
                         {booking.status === 'pending' ? (
-                          <p className="text-sm text-gray-600 mt-1">Haz clic en el botón <span className="font-bold text-[#FF385C]">"Establecer Precio"</span> arriba para agregar uno.</p>
+                          <p className="text-sm text-gray-600 mt-1">Haz clic en el botón <span className="font-bold text-[var(--yass-gold)]">"Establecer Precio"</span> arriba para agregar uno.</p>
                         ) : (
                           <p className="text-sm text-gray-600 mt-1">Esta reserva ya está {booking.status === 'confirmed' ? 'confirmada' : booking.status === 'cancelled' ? 'cancelada' : 'completada'}, por lo que no se puede modificar el precio.</p>
                         )}
@@ -555,9 +555,9 @@ export default function BookingDetail() {
 
             {/* Datos Adicionales - Tarjeta con Sombras y Hover */}
             {(booking.airportData || booking.customData || booking.routeData || booking.mensaje || booking.details) && (
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl hover:shadow-[#FF385C]/10 transition-all duration-500 transform hover:-translate-y-1">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl hover:shadow-[var(--yass-gold)]/10 transition-all duration-500 transform hover:-translate-y-1">
                 <h2 className="text-2xl font-extrabold text-gray-900 mb-6 flex items-center gap-3">
-                  <div className="bg-gradient-to-br from-[#FF385C] via-[#E01E4F] to-[#FF385C] p-2 rounded-xl shadow-lg shadow-[#FF385C]/30">
+                  <div className="bg-gradient-to-br from-[var(--yass-gold)] via-[var(--yass-gold-light)] to-[var(--yass-gold)] p-2 rounded-xl shadow-lg shadow-[var(--yass-gold)]/30">
                     <Info className="h-6 w-6 text-white" />
                   </div>
                   <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -630,9 +630,9 @@ export default function BookingDetail() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Información de Reserva - Tarjeta con Sombras y Hover */}
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 hover:shadow-2xl hover:shadow-[#FF385C]/10 transition-all duration-500 transform hover:-translate-y-1">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 hover:shadow-2xl hover:shadow-[var(--yass-gold)]/10 transition-all duration-500 transform hover:-translate-y-1">
               <h2 className="text-xl font-extrabold text-gray-900 mb-6 flex items-center gap-2">
-                <div className="bg-gradient-to-br from-[#FF385C] via-[#E01E4F] to-[#FF385C] p-1.5 rounded-lg shadow-md shadow-[#FF385C]/30">
+                <div className="bg-gradient-to-br from-[var(--yass-gold)] via-[var(--yass-gold-light)] to-[var(--yass-gold)] p-1.5 rounded-lg shadow-md shadow-[var(--yass-gold)]/30">
                   <FileText className="h-5 w-5 text-white" />
                 </div>
                 <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -641,9 +641,9 @@ export default function BookingDetail() {
               </h2>
               <div className="space-y-4">
                 {booking.reservationNumber && (
-                  <div className="bg-gradient-to-br from-[#FF385C]/10 to-[#E01E4F]/10 p-4 rounded-xl border-2 border-[#FF385C]/30">
+                  <div className="bg-gradient-to-br from-[var(--yass-gold)]/10 to-[var(--yass-gold-light)]/10 p-4 rounded-xl border-2 border-[var(--yass-gold)]/30">
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Número de Reserva</p>
-                    <p className="font-extrabold text-[#FF385C] text-lg font-mono">{booking.reservationNumber}</p>
+                    <p className="font-extrabold text-[var(--yass-gold)] text-lg font-mono">{booking.reservationNumber}</p>
                   </div>
                 )}
                 {booking.invoiceNumber && (

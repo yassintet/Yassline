@@ -1,24 +1,78 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { authAPI } from "@/lib/api";
+import { authUtils } from "@/lib/auth";
+import { useI18n } from "@/lib/i18n/context";
+import Logo from "@/components/Logo";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { t } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica de autenticación
-    console.log("Login attempt:", { email, password });
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await authAPI.login(email, password);
+
+      if (response.success && response.data) {
+        // Guardar token y usuario
+        const authData = response.data as { token?: string; user?: any };
+        const { token, user } = authData;
+        
+        console.log('🔐 Login exitoso:', {
+          hasToken: !!token,
+          tokenLength: token?.length,
+          user: user,
+          userRole: user?.role,
+        });
+        
+        if (token && user) {
+          authUtils.setAuth(token, user);
+          
+          // Verificar que se guardó correctamente
+          const savedToken = authUtils.getToken();
+          console.log('✅ Token guardado:', {
+            saved: !!savedToken,
+            length: savedToken?.length,
+          });
+
+          // Redirigir según el rol
+          if (user.role === 'admin') {
+            router.push('/admin');
+          } else {
+            router.push('/');
+          }
+        } else {
+          console.error('❌ No se recibió token o usuario del servidor');
+          setError(t('login.authError'));
+        }
+        } else {
+          console.error('❌ Error en login:', response.error);
+          setError(response.error || t('login.error'));
+        }
+      } catch (err) {
+        setError(t('login.connectionError'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/20">
+    <div className="min-h-screen bg-[var(--yass-cream)]">
       <Navbar />
 
       {/* Main Content */}
@@ -28,33 +82,39 @@ export default function LoginPage() {
           <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
             {/* Logo */}
             <div className="text-center mb-8">
-              <Link href="/">
-                <h1 className="text-3xl font-bold text-[#FF385C] mb-2">
-                  Yassline Tour
-                </h1>
-              </Link>
-              <p className="text-gray-500 text-sm">Tu compañero de confianza</p>
+              <div className="flex justify-center mb-4">
+                <Logo href="/" size="lg" />
+              </div>
+              <p className="text-gray-500 text-sm">{t('login.trustedPartner')}</p>
             </div>
 
             {/* Title */}
             <div className="mb-8">
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                Bienvenido de nuevo
+                {t('login.title')}
               </h2>
               <p className="text-gray-600 text-sm">
-                Inicia sesión para continuar
+                {t('login.subtitle')}
               </p>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email Input */}
+              {/* Email/Username Input */}
               <div>
                 <label 
                   htmlFor="email" 
                   className="block text-sm font-semibold text-gray-700 mb-2"
                 >
-                  Correo Electrónico
+                  {t('login.usernameOrEmail')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -62,14 +122,16 @@ export default function LoginPage() {
                   </div>
                   <input
                     id="email"
-                    type="email"
+                    type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#FF385C] focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400"
-                    placeholder="tu@email.com"
+                    disabled={loading}
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--yass-gold)] focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder={t('login.usernameOrEmailPlaceholder')}
                   />
                 </div>
+                <p className="mt-1 text-xs text-gray-500">{t('login.usernameOrEmailHint')}</p>
               </div>
 
               {/* Password Input */}
@@ -78,7 +140,7 @@ export default function LoginPage() {
                   htmlFor="password" 
                   className="block text-sm font-semibold text-gray-700 mb-2"
                 >
-                  Contraseña
+                  {t('login.password')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -90,13 +152,15 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#FF385C] focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400"
-                    placeholder="••••••••"
+                    disabled={loading}
+                    className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--yass-gold)] focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder={t('login.passwordPlaceholder')}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    disabled={loading}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors disabled:cursor-not-allowed"
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -111,18 +175,19 @@ export default function LoginPage() {
               <div className="flex justify-end">
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-[#0066CC] hover:text-[#0052A3] font-medium transition-colors"
+                  className="text-sm text-[var(--yass-gold)] hover:text-[var(--yass-gold-light)] font-medium transition-colors"
                 >
-                  ¿Olvidaste tu contraseña?
+                  {t('login.forgotPassword')}
                 </Link>
               </div>
 
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#FF385C] to-[#E01E4F] text-white py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-lg hover:scale-[1.02] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#FF385C] focus:ring-offset-2"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-[var(--yass-gold)] to-[var(--yass-gold-light)] text-white py-4 px-6 rounded-xl font-semibold text-lg hover:shadow-lg hover:scale-[1.02] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--yass-gold)] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                Entrar
+                {loading ? t('login.signingIn') : t('login.signIn')}
               </button>
             </form>
 
@@ -136,12 +201,12 @@ export default function LoginPage() {
             {/* Sign Up Link */}
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                ¿No tienes una cuenta?{" "}
+                {t('login.noAccount')}{" "}
                 <Link
                   href="/register"
-                  className="text-[#0066CC] hover:text-[#0052A3] font-semibold transition-colors"
+                  className="text-[var(--yass-gold)] hover:text-[var(--yass-gold-light)] font-semibold transition-colors"
                 >
-                  Regístrate
+                  {t('login.signUp')}
                 </Link>
               </p>
             </div>
@@ -149,13 +214,13 @@ export default function LoginPage() {
 
           {/* Additional Info */}
           <p className="mt-6 text-center text-xs text-gray-500">
-            Al iniciar sesión, aceptas nuestros{" "}
-            <Link href="/terms" className="text-[#0066CC] hover:underline">
-              Términos de Servicio
+            {t('login.acceptTerms')}{" "}
+            <Link href="/terminos-condiciones" className="text-[var(--yass-gold)] hover:underline">
+              {t('login.termsOfService')}
             </Link>{" "}
-            y{" "}
-            <Link href="/privacy" className="text-[#0066CC] hover:underline">
-              Política de Privacidad
+            {t('login.and')}{" "}
+            <Link href="/politica-privacidad" className="text-[var(--yass-gold)] hover:underline">
+              {t('login.privacyPolicy')}
             </Link>
           </p>
         </div>

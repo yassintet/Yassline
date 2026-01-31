@@ -3,10 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev",
+    "build": "next build --webpack",
+    "build:production": "next build --webpack",
+    "export": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "clean": "rm -rf .next out node_modules/.cache",
+    "clean:win": "if exist .next rmdir /s /q .next && if exist out rmdir /s /q out",
+    "deploy:build": "npm run build && echo. && echo Listo para subir: sube TODO el contenido de la carpeta 'out' a la raiz de tu dominio en Hostinger (public_html)."
   },
   "dependencies": {
     "lucide-react": "^0.562.0",
@@ -16,12 +25,18 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jest": "^29.5.12",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -1,0 +1,29 @@
+{
+  "name": "Yassline Tour - Transporte Turístico Premium Marruecos",
+  "short_name": "Yassline Tour",
+  "description": "Transporte turístico premium en Marruecos con flota Mercedes-Benz. Circuitos exclusivos, traslados aeropuerto 24/7.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0066CC",
+  "theme_color": "#0066CC",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/img/v-class1.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/img/v-class1.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "transportation", "tourism"],
+  "lang": "es-ES",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

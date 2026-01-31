@@ -1,0 +1,51 @@
+# robots.txt optimizado para SEO
+# Yassline Tour - Transporte Turístico Premium Marruecos
+
+# Permitir todos los bots principales
+User-agent: *
+Allow: /
+
+# Permitir Googlebot específicamente
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Permitir Googlebot-Image para imágenes
+User-agent: Googlebot-Image
+Allow: /img/
+
+# Permitir Bingbot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Bloquear rutas administrativas y privadas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /login
+Disallow: /register
+Disallow: /mis-reservas
+Disallow: /pago/
+Disallow: /reservas/
+Disallow: /perfil
+Disallow: /favoritos
+Disallow: /recompensas
+Disallow: /notificaciones
+
+# Permitir páginas importantes para SEO
+Allow: /
+Allow: /transporte
+Allow: /circuitos
+Allow: /vehiculos
+Allow: /contacto
+Allow: /sobre-nosotros
+Allow: /politica-privacidad
+Allow: /terminos-condiciones
+
+# Sitemaps
+Sitemap: https://yassline.com/sitemap.xml
+Sitemap: https://yassline.com/sitemap.xml.gz
+
+# Host
+Host: https://yassline.com

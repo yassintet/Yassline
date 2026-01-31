@@ -56,7 +56,8 @@
     "previous": "Précédent",
     "next": "Suivant",
     "page": "Page",
-    "of": "de"
+    "of": "de",
+    "home": "Accueil"
   },
   "home": {
     "title": "Bienvenue à Yassline Tour",
@@ -97,6 +98,7 @@
     "selectServiceType": "Type de Service",
     "allServices": "Tous les services",
     "loadingServices": "Chargement des services...",
+    "loadingService": "Chargement du service...",
     "errorLoadingServices": "Erreur lors du chargement des services",
     "noServicesAvailable": "Aucun service de transport disponible pour le moment",
     "routes": "Itinéraires",
@@ -327,6 +329,7 @@
     "location": "Localisation",
     "marrakechMorocco": "Maroc",
     "whatsapp": "WhatsApp",
+    "whatsappAria": "Ouvrir le chat d'assistance client sur WhatsApp",
     "chatWithUs": "Discutez avec nous",
     "sendMessage": "Envoyez-nous un Message",
     "messageSent": "Message envoyé avec succès! Nous vous contacterons bientôt.",
@@ -348,12 +351,17 @@
     "message": "Message",
     "messagePlaceholder": "Dites-nous comment nous pouvons vous aider...",
     "sending": "Envoi en cours...",
-    "sendMessage2": "Envoyer le Message"
+    "sendMessage2": "Envoyer le Message",
+    "stayConnected": "Restez connecté",
+    "contactDescription": "Des questions sur nos circuits, transport ou véhicules? Nous sommes là pour vous aider.",
+    "formDescription": "Remplissez le formulaire et nous vous répondrons dans les plus brefs délais."
   },
   "vehicles": {
     "title": "Notre Flotte",
     "subtitle": "Véhicules Mercedes-Benz de dernière génération pour chaque besoin",
     "filterByType": "Filtrer par type:",
+    "selectVehicleType": "Type de Véhicule",
+    "allVehicles": "Tous les Véhicules",
     "all": "Tous",
     "vip": "VIP",
     "family": "Famille",
@@ -362,6 +370,7 @@
     "loading": "Chargement des véhicules...",
     "errorLoading": "Erreur lors du chargement des véhicules",
     "noVehicles": "Aucun véhicule disponible pour le moment.",
+    "noVehiclesAvailable": "Aucun véhicule disponible pour le moment. Veuillez nous contacter pour plus d'informations.",
     "noVehiclesType": "Aucun véhicule de type \"{type}\" disponible.",
     "viewAllVehicles": "Voir tous les véhicules",
     "seats": "places",
@@ -501,7 +510,8 @@
       "airport": "Aéroport",
       "intercity": "Interurbain",
       "hourly": "Par Heures",
-      "custom": "Personnalisé"
+      "custom": "Personnalisé",
+      "vehicle": "Véhicule"
     },
     "status": {
       "pending": "En attente",
@@ -700,6 +710,17 @@
     "passengers": "Passagers",
     "price": "Prix",
     "pricePending": "Prix en attente",
+    "proposedPrice": "Prix Proposé",
+    "priceProposal": {
+      "title": "Prix Proposé par l'Administration",
+      "message": "L'administration a proposé un prix pour votre réservation. Veuillez accepter ou rejeter pour continuer.",
+      "accept": "Accepter le Prix",
+      "reject": "Rejeter le Prix",
+      "accepted": "Prix Accepté",
+      "rejected": "Prix Rejeté",
+      "acceptedMessage": "Vous avez accepté le prix proposé. La réservation sera traitée.",
+      "rejectedMessage": "Vous avez rejeté le prix proposé. Nous vous contacterons pour négocier."
+    },
     "actions": "Actions",
     "cancel": "Annuler la Réservation",
     "cancelling": "Annulation...",
@@ -716,6 +737,7 @@
     "vehicleType": "Type de Véhicule",
     "from": "De",
     "to": "À",
+    "passengerName": "Nom du Passager",
     "airport": "Aéroport",
     "flightDate": "Date de Vol",
     "flightTime": "Heure de Vol",
@@ -858,5 +880,99 @@
     "usernameInvalidChars": "Le nom d'utilisateur ne peut contenir que des lettres minuscules, des chiffres et des underscores (_)",
     "emailInvalid": "Email invalide",
     "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères"
+  },
+  "payment": {
+    "title": "Méthode de Paiement",
+    "selectMethod": "Sélectionnez une méthode de paiement",
+    "methods": {
+      "cash": {
+        "name": "Espèces",
+        "description": "Paiement en espèces au moment de la prise en charge",
+        "icon": "💵"
+      },
+      "bank_transfer": {
+        "name": "Virement Bancaire",
+        "description": "Effectuez un virement bancaire sur notre compte",
+        "icon": "🏦"
+      },
+      "binance": {
+        "name": "Binance Pay",
+        "description": "Payez avec des cryptomonnaies en utilisant Binance Pay",
+        "icon": "₿"
+      },
+      "redotpay": {
+        "name": "Redotpay",
+        "description": "Paiement sécurisé par carte ou virement",
+        "icon": "💳"
+      }
+    },
+    "amount": "Montant à Payer",
+    "currency": "Devise",
+    "processing": "Traitement du paiement...",
+    "success": "Paiement traité avec succès",
+    "error": "Erreur lors du traitement du paiement",
+    "bankTransfer": {
+      "title": "Informations de Virement Bancaire",
+      "reference": "Numéro de Référence",
+      "bankName": "Nom de la Banque",
+      "accountNumber": "Numéro de Compte",
+      "transferDate": "Date de Virement",
+      "proofImage": "Preuve de Virement",
+      "uploadProof": "Télécharger la Preuve",
+      "instructions": "Effectuez le virement et téléchargez la preuve pour confirmer votre paiement"
+    },
+    "binance": {
+      "title": "Payer avec Binance Pay",
+      "walletAddress": "Adresse du Portefeuille",
+      "network": "Réseau",
+      "qrCode": "Code QR",
+      "transactionHash": "Hash de Transaction",
+      "enterHash": "Entrez le hash de votre transaction",
+      "verify": "Vérifier le Paiement",
+      "instructions": "Scannez le code QR ou envoyez le montant à l'adresse du portefeuille indiquée"
+    },
+    "redotpay": {
+      "title": "Payer avec Redotpay",
+      "redirecting": "Redirection vers Redotpay...",
+      "instructions": "Vous serez redirigé vers la page de paiement sécurisée de Redotpay"
+    },
+    "moneygram": {
+      "title": "Payer avec MoneyGram",
+      "referenceNumber": "Numéro de Référence",
+      "receiverName": "Nom du Destinataire",
+      "country": "Pays",
+      "city": "Ville",
+      "instructions": "Effectuez le transfert MoneyGram avec les informations fournies et marquez comme payé lorsque vous avez terminé la transaction",
+      "note": "Une fois le transfert effectué, marquez comme payé et notre équipe examinera le paiement dans un délai maximum de 48 heures"
+    },
+    "cash": {
+      "title": "Paiement en Espèces",
+      "instructions": "Vous paierez en espèces au moment de la prise en charge. Le conducteur confirmera le paiement.",
+      "note": "Note : Le paiement doit être effectué au moment de la prise en charge"
+    },
+    "status": {
+      "pending": "En Attente",
+      "pending_review": "En Révision",
+      "completed": "Terminé",
+      "failed": "Échoué",
+      "cancelled": "Annulé",
+      "refunded": "Remboursé"
+    },
+    "cashPayment": {
+      "message": "Vous paierez en espèces au conducteur au moment de la prise en charge",
+      "note": "Le conducteur confirmera le paiement lors de la prise en charge"
+    },
+    "markAsPaid": "Marquer comme Payé",
+    "paymentInReview": "Votre paiement est en cours d'examen par l'administration. Vous recevrez une notification lorsqu'il sera confirmé.",
+    "successTitle": "Paiement Réussi!",
+    "successMessage": "Votre paiement a été traité avec succès",
+    "paymentDetails": "Détails du Paiement",
+    "viewBooking": "Voir la Réservation",
+    "myBookings": "Mes Réservations",
+    "completed": "Terminé",
+    "pending": "En Attente",
+    "cancelledTitle": "Paiement annulé",
+    "cancelledMessage": "Le processus de paiement a été annulé. Aucun prélèvement n'a été effectué.",
+    "backToBookings": "Retour à mes réservations"
   }
 }

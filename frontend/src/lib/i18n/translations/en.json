@@ -56,7 +56,8 @@
     "previous": "Previous",
     "next": "Next",
     "page": "Page",
-    "of": "of"
+    "of": "of",
+    "home": "Home"
   },
   "home": {
     "title": "Welcome to Yassline Tour",
@@ -97,6 +98,7 @@
     "selectServiceType": "Service Type",
     "allServices": "All services",
     "loadingServices": "Loading services...",
+    "loadingService": "Loading service...",
     "errorLoadingServices": "Error loading services",
     "noServicesAvailable": "No transport services available at this time",
     "routes": "Routes",
@@ -335,6 +337,7 @@
     "location": "Location",
     "marrakechMorocco": "Morocco",
     "whatsapp": "WhatsApp",
+    "whatsappAria": "Open customer support chat on WhatsApp",
     "chatWithUs": "Chat with us",
     "sendMessage": "Send us a Message",
     "messageSent": "Message sent successfully! We will contact you soon.",
@@ -356,12 +359,17 @@
     "message": "Message",
     "messagePlaceholder": "Tell us how we can help you...",
     "sending": "Sending...",
-    "sendMessage2": "Send Message"
+    "sendMessage2": "Send Message",
+    "stayConnected": "Stay connected",
+    "contactDescription": "Have questions about our circuits, transport or vehicles? We're here to help.",
+    "formDescription": "Fill out the form and we'll get back to you as soon as possible."
   },
   "vehicles": {
     "title": "Our Fleet",
     "subtitle": "Latest generation Mercedes-Benz vehicles for every need",
     "filterByType": "Filter by type:",
+    "selectVehicleType": "Vehicle Type",
+    "allVehicles": "All Vehicles",
     "all": "All",
     "vip": "VIP",
     "family": "Family",
@@ -370,6 +378,7 @@
     "loading": "Loading vehicles...",
     "errorLoading": "Error loading vehicles",
     "noVehicles": "No vehicles available at this time.",
+    "noVehiclesAvailable": "No vehicles available at this time. Please contact us for more information.",
     "noVehiclesType": "No vehicles of type \"{type}\" available.",
     "viewAllVehicles": "View all vehicles",
     "seats": "seats",
@@ -624,7 +633,8 @@
       "airport": "Airport",
       "intercity": "Intercity",
       "hourly": "Hourly",
-      "custom": "Custom"
+      "custom": "Custom",
+      "vehicle": "Vehicle"
     },
     "status": {
       "pending": "Pending",
@@ -823,6 +833,17 @@
     "passengers": "Passengers",
     "price": "Price",
     "pricePending": "Price pending",
+    "proposedPrice": "Proposed Price",
+    "priceProposal": {
+      "title": "Price Proposed by Administration",
+      "message": "The administration has proposed a price for your reservation. Please accept or reject to continue.",
+      "accept": "Accept Price",
+      "reject": "Reject Price",
+      "accepted": "Price Accepted",
+      "rejected": "Price Rejected",
+      "acceptedMessage": "You have accepted the proposed price. The reservation will be processed.",
+      "rejectedMessage": "You have rejected the proposed price. We will contact you to negotiate."
+    },
     "actions": "Actions",
     "cancel": "Cancel Booking",
     "cancelling": "Cancelling...",
@@ -839,6 +860,7 @@
     "vehicleType": "Vehicle Type",
     "from": "From",
     "to": "To",
+    "passengerName": "Passenger Name",
     "airport": "Airport",
     "flightDate": "Flight Date",
     "flightTime": "Flight Time",
@@ -892,5 +914,104 @@
     "transports": "Transports",
     "circuits": "Circuits",
     "vehicles": "Vehicles"
+  },
+  "payment": {
+    "title": "Payment Method",
+    "selectMethod": "Select a payment method",
+    "methods": {
+      "cash": {
+        "name": "Cash",
+        "description": "Pay in cash at pickup time",
+        "icon": "💵"
+      },
+      "bank_transfer": {
+        "name": "Bank Transfer",
+        "description": "Make a bank transfer to our account",
+        "icon": "🏦"
+      },
+      "binance": {
+        "name": "Binance Pay",
+        "description": "Pay with cryptocurrencies using Binance Pay",
+        "icon": "₿"
+      },
+      "redotpay": {
+        "name": "Redotpay",
+        "description": "Secure payment with card or transfer",
+        "icon": "💳"
+      },
+      "moneygram": {
+        "name": "MoneyGram",
+        "description": "Fast and secure international money transfer",
+        "icon": "🌍"
+      }
+    },
+    "amount": "Amount to Pay",
+    "currency": "Currency",
+    "processing": "Processing payment...",
+    "success": "Payment processed successfully",
+    "error": "Error processing payment",
+    "bankTransfer": {
+      "title": "Bank Transfer Information",
+      "reference": "Reference Number",
+      "bankName": "Bank Name",
+      "accountNumber": "Account Number",
+      "transferDate": "Transfer Date",
+      "proofImage": "Transfer Proof",
+      "uploadProof": "Upload Proof",
+      "instructions": "Make the transfer and upload the proof to confirm your payment"
+    },
+    "binance": {
+      "title": "Pay with Binance Pay",
+      "walletAddress": "Wallet Address",
+      "network": "Network",
+      "qrCode": "QR Code",
+      "transactionHash": "Transaction Hash",
+      "enterHash": "Enter your transaction hash",
+      "verify": "Verify Payment",
+      "instructions": "Scan the QR code or send the amount to the indicated wallet address"
+    },
+    "redotpay": {
+      "title": "Pay with Redotpay",
+      "redirecting": "Redirecting to Redotpay...",
+      "instructions": "You will be redirected to Redotpay's secure payment page"
+    },
+    "moneygram": {
+      "title": "Pay with MoneyGram",
+      "referenceNumber": "Reference Number",
+      "receiverName": "Receiver Name",
+      "country": "Country",
+      "city": "City",
+      "instructions": "Complete the MoneyGram transfer with the provided information and mark as paid when you have completed the transaction",
+      "note": "Once the transfer is completed, mark as paid and our team will review the payment within a maximum of 48 hours"
+    },
+    "cash": {
+      "title": "Cash Payment",
+      "instructions": "You will pay in cash at pickup time. The driver will confirm the payment.",
+      "note": "Note: Payment must be made at pickup time"
+    },
+    "status": {
+      "pending": "Pending",
+      "pending_review": "Under Review",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    },
+    "cashPayment": {
+      "message": "You will pay in cash to the driver at pickup time",
+      "note": "The driver will confirm the payment when picking you up"
+    },
+    "markAsPaid": "Mark as Paid",
+    "paymentInReview": "Your payment is being reviewed by administration. You will receive a notification when it is confirmed.",
+    "successTitle": "Payment Successful!",
+    "successMessage": "Your payment has been processed successfully",
+    "paymentDetails": "Payment Details",
+    "viewBooking": "View Booking",
+    "myBookings": "My Bookings",
+    "completed": "Completed",
+    "pending": "Pending",
+    "cancelledTitle": "Payment cancelled",
+    "cancelledMessage": "The payment process was cancelled. No charge has been made.",
+    "backToBookings": "Back to my bookings"
   }
 }
