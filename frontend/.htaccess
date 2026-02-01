@@ -20,7 +20,12 @@
   RewriteCond %{REQUEST_URI} ^/_next/
   RewriteRule ^(.*)$ - [L]
 
-  # PAGO: PRIMERO - /pago/ID-real -> servir placeholder (solo existe ese HTML en el build).
+  # RESERVAS: /reservas/ID-real -> servir placeholder (solo existe placeholder.html en el build).
+  RewriteCond %{REQUEST_URI} ^/reservas/[^/]+/?$
+  RewriteCond %{REQUEST_URI} !^/reservas/placeholder/?$
+  RewriteRule ^reservas/([^/]+)/?$ /reservas/placeholder.html [L]
+
+  # PAGO: /pago/ID-real -> servir placeholder (solo existe ese HTML en el build).
   RewriteCond %{REQUEST_URI} ^/pago/[^/]+/?$
   RewriteCond %{REQUEST_URI} !^/pago/placeholder/?$
   RewriteRule ^pago/([^/]+)/?$ /pago/placeholder.html [L]

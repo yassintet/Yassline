@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -54,7 +54,19 @@ export default function ReservaDetallePage() {
     mensaje: '',
   });
 
-  const bookingId = params?.id as string;
+  // Fix para static export: si params devuelve "placeholder", leer el ID real de la URL
+  const bookingId = useMemo(() => {
+    const paramId = params?.id as string;
+    // Si es "placeholder" (del HTML pre-renderizado), extraer ID real de window.location
+    if (paramId === 'placeholder' && typeof window !== 'undefined') {
+      const pathParts = window.location.pathname.split('/');
+      const urlId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+      if (urlId && urlId !== 'placeholder' && urlId !== 'reservas') {
+        return urlId;
+      }
+    }
+    return paramId;
+  }, [params?.id]);
 
   const loadBooking = useCallback(async () => {
     try {
