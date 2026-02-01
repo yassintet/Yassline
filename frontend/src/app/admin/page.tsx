@@ -30,7 +30,9 @@ import {
   ArrowUp,
   ArrowDown,
   Star,
-  FileText
+  FileText,
+  CreditCard,
+  Wallet
 } from "lucide-react";
 import { getVehicleIcon } from "@/lib/vehicleIcons";
 import LoadingState from "@/components/LoadingState";
@@ -612,6 +614,16 @@ export default function AdminDashboard() {
                   </span>
                 )}
               </button>
+              <Link
+                href="/admin/payments"
+                className="px-6 py-4 font-semibold text-sm border-b-3 transition-all duration-300 flex items-center gap-2 whitespace-nowrap border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-orange-400"
+              >
+                <Wallet className="h-5 w-5" />
+                Pagos
+                <span className="ml-1 px-2 py-0.5 bg-orange-500 text-white rounded-full text-xs font-bold">
+                  Revisar
+                </span>
+              </Link>
             </nav>
           </div>
         </div>
